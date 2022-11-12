@@ -9,7 +9,8 @@
     <Description>Unofficial release of original $(ProjectName) package (https://www.nuget.org/packages/$(ProjectName)) forked from the official GitHub repo (https://github.com/snatch-dev/Convey)</Description>
     <Title>$(ProjectName)</Title>
     <PackageTags>$(ProjectName)</PackageTags>
-    <PackageProjectUrl>https://github.com/mehyaa/Convey/tree/edge</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mehyaa/Convey.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/mehyaa/Convey.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
