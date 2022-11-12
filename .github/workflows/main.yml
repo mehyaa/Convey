@@ -1,4 +1,4 @@
-name: CI
+name: Build and Push NuGet Packages
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
       run: dotnet restore $SOLUTION --verbosity minimal
 
     - name: Build
-      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal /p:Version="${{ steps.date.outputs.formattedTime }}.0.${{ github.run_number }}""
+      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal /p:Version="${{ steps.date.outputs.formattedTime }}.0.${{ github.run_number }}"
 
     - name: Run Tests
       run: dotnet test --configuration $BUILD_CONFIG --no-restore --no-build --verbosity minimal
