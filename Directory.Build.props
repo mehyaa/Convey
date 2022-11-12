@@ -3,12 +3,12 @@
     <TargetFramework>net7.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
     <Authors>mehyaa,DevMentors.io</Authors>
-    <AssemblyName>$(ProjectName)</AssemblyName>
-    <PackageId>$(ProjectName)</PackageId>
-    <Product>$(ProjectName)</Product>
-    <Description>Unofficial release of original $(ProjectName) package (https://www.nuget.org/packages/$(ProjectName)) forked from the official GitHub repo (https://github.com/snatch-dev/Convey)</Description>
-    <Title>$(ProjectName)</Title>
-    <PackageTags>$(ProjectName)</PackageTags>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <PackageId>$(MSBuildProjectName)</PackageId>
+    <Product>$(MSBuildProjectName)</Product>
+    <Description>Unofficial release of original $(MSBuildProjectName) package (https://www.nuget.org/packages/$(MSBuildProjectName)) forked from the official GitHub repo (https://github.com/snatch-dev/Convey.git)</Description>
+    <Title>$(MSBuildProjectName)</Title>
+    <PackageTags>$(MSBuildProjectName)</PackageTags>
     <RepositoryUrl>https://github.com/mehyaa/Convey.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/mehyaa/Convey.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
