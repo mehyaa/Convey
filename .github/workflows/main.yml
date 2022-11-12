@@ -1,17 +1,51 @@
 name: CI
 
-on: [push]
+on:
+  push:
+    branches:
+    - edge
+  workflow_dispatch:
+  repository_dispatch:
 
 jobs:
   build:
 
+    env:
+      BUILD_CONFIG: 'Release'
+      SOLUTION: 'Convey.sln'
+      DOTNET_VERSION: 7.0.100
+
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.100
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Get Year
+      id: date
+      uses: josStorer/get-current-time@v2
+      with:
+        format: YY
+
+    - name: Checkout Source
+      uses: actions/checkout@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
+
+    - name: Clean Solution
+      run: dotnet clean --verbosity minimal
+
+    - name: Restore Dependencies
+      run: dotnet restore $SOLUTION --verbosity minimal
+
+    - name: Build
+      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal /p:Version="${{ steps.date.outputs.formattedTime }}.0.${{ github.run_number }}""
+
+    - name: Run Tests
+      run: dotnet test --configuration $BUILD_CONFIG --no-restore --no-build --verbosity minimal
+
+    - name: Publish
+      run: dotnet nuget push **\*.nupkg --source 'https://nuget.pkg.github.com/mehyaa/index.json' --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
