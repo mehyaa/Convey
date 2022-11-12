@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\Convey.WebApi\src\Convey.WebApi\Convey.WebApi.csproj" />
     <ProjectReference Include="..\..\..\Convey.Docs.Swagger\src\Convey.Docs.Swagger\Convey.Docs.Swagger.csproj" />

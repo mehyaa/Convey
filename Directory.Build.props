@@ -2,12 +2,14 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
-    <Product>$(ProjectName)</Product>
-    <Description>$(ProjectName)</Description>
-    <Authors>DevMentors.io</Authors>
+    <Authors>mehyaa,DevMentors.io</Authors>
     <AssemblyName>$(ProjectName)</AssemblyName>
-    <Title>$(ProjectName)</Title>
     <PackageId>$(ProjectName)</PackageId>
+    <Product>$(ProjectName)</Product>
+    <Description>Unofficial release of original $(ProjectName) package (https://www.nuget.org/packages/$(ProjectName)) forked from the official GitHub repo (https://github.com/snatch-dev/Convey)</Description>
+    <Title>$(ProjectName)</Title>
     <PackageTags>$(ProjectName)</PackageTags>
+    <PackageProjectUrl>https://github.com/mehyaa/Convey/tree/edge</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
