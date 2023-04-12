@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Convey.Logging.Options;
 using Convey.Types;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +13,10 @@ using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.Grafana.Loki;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Convey.Logging;
 
@@ -49,6 +50,7 @@ public static class Extensions
                 configure?.Invoke(context, loggerConfiguration);
             });
 
+    [Obsolete("Prefer UseLogging() on IHostBuilder")]
     public static IWebHostBuilder UseLogging(this IWebHostBuilder webHostBuilder,
         Action<WebHostBuilderContext, LoggerConfiguration> configure = null, string loggerSectionName = LoggerSectionName,
         string appSectionName = AppSectionName)
@@ -74,7 +76,7 @@ public static class Extensions
                 configure?.Invoke(context, loggerConfiguration);
             });
 
-    public static IEndpointConventionBuilder MapLogLevelHandler(this IEndpointRouteBuilder builder, 
+    public static IEndpointConventionBuilder MapLogLevelHandler(this IEndpointRouteBuilder builder,
         string endpointRoute = "~/logging/level")
         => builder.MapPost(endpointRoute, LevelSwitch);
 
@@ -118,6 +120,7 @@ public static class Extensions
         var elkOptions = options.Elk ?? new ElkOptions();
         var seqOptions = options.Seq ?? new SeqOptions();
         var lokiOptions = options.Loki ?? new LokiOptions();
+        var azureOptions = options.Azure ?? new AzureOptions();
 
         if (consoleOptions.Enabled)
         {
@@ -165,7 +168,7 @@ public static class Extensions
                     Login = lokiOptions.LokiUsername,
                     Password = lokiOptions.LokiPassword
                 };
-                    
+
                 loggerConfiguration.WriteTo.GrafanaLoki(
                     lokiOptions.Url,
                     credentials: auth,
@@ -175,36 +178,58 @@ public static class Extensions
             }
             else
             {
-                loggerConfiguration.WriteTo.GrafanaLoki(                        
+                loggerConfiguration.WriteTo.GrafanaLoki(
                     lokiOptions.Url,
                     batchPostingLimit: lokiOptions.BatchPostingLimit ?? 1000,
                     queueLimit: lokiOptions.QueueLimit,
-                    period: lokiOptions.Period).MinimumLevel.ControlledBy(LoggingLevelSwitch);;
+                    period: lokiOptions.Period).MinimumLevel.ControlledBy(LoggingLevelSwitch); ;
             }
-                
-                
+        }
+
+        if (azureOptions.Enabled)
+        {
+            var telemetryConfiguration = new TelemetryConfiguration
+            {
+                ConnectionString = azureOptions.ConnectionString
+            };
+
+            if (!string.IsNullOrEmpty(azureOptions.InstrumentationKey))
+            {
+                telemetryConfiguration.InstrumentationKey = azureOptions.InstrumentationKey;
+            }
+
+            switch (azureOptions.LogType)
+            {
+                case AzureLogType.Event:
+                    loggerConfiguration.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Events);
+                    break;
+
+                case AzureLogType.Trace:
+                    loggerConfiguration.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
+                    break;
+            }
         }
     }
 
     internal static LogEventLevel GetLogEventLevel(string level)
-        => Enum.TryParse<LogEventLevel>(level, true, out var logLevel) 
+        => Enum.TryParse<LogEventLevel>(level, true, out var logLevel)
             ? logLevel
             : LogEventLevel.Information;
 
     public static IConveyBuilder AddCorrelationContextLogging(this IConveyBuilder builder)
     {
         builder.Services.AddTransient<CorrelationContextLoggingMiddleware>();
-            
+
         return builder;
     }
-        
+
     public static IApplicationBuilder UserCorrelationContextLogging(this IApplicationBuilder app)
     {
         app.UseMiddleware<CorrelationContextLoggingMiddleware>();
-            
+
         return app;
     }
-        
+
     private static async Task LevelSwitch(HttpContext context)
     {
         var service = context.RequestServices.GetService<ILoggingService>();
