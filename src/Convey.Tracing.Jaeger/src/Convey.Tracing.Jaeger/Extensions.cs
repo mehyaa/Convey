@@ -1,13 +1,11 @@
 using Convey.Tracing.Jaeger.Builders;
 using Convey.Tracing.Jaeger.Tracers;
-using Convey.Types;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Extensions.Docker.Resources;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 using OpenTracing;
@@ -58,49 +56,48 @@ public static class Extensions
             return builder;
         }
 
-        builder.Services.AddOpenTelemetryTracing(telemetryBuilder =>
-            telemetryBuilder
-                .SetResourceBuilder(
-                    ResourceBuilder
-                        .CreateDefault()
-                        .AddDetector(new DockerResourceDetector()))
-                .AddAspNetCoreInstrumentation(string.Empty, aspCoreOptions =>
-                {
-                    aspCoreOptions.Filter = context =>
+        var telemetryBuilder =
+            builder.Services
+                .AddOpenTelemetry()
+                .WithTracing(builder =>
+                    builder
+                        .ConfigureResource(resource => resource.AddDetector(new DockerResourceDetector()))
+                        .AddAspNetCoreInstrumentation(string.Empty, aspCoreOptions =>
+                        {
+                            aspCoreOptions.Filter = context =>
+                            {
+                                return options.ExcludePaths?.Contains(context.Request.Path.ToString()) != true;
+                            };
+                        })
+                    .AddHttpClientInstrumentation()
+                    .AddJaegerExporter(jaegerOptions =>
                     {
-                        return options.ExcludePaths?.Contains(context.Request.Path.ToString()) != true;
-                    };
-                })
-                .AddHttpClientInstrumentation()
-                .AddJaegerExporter(jaegerOptions =>
-                {
-                    jaegerOptions.AgentHost = options?.UdpHost ?? "localhost";
-                    jaegerOptions.AgentPort = options?.UdpPort ?? 6831;
+                        jaegerOptions.AgentHost = options?.UdpHost ?? "localhost";
+                        jaegerOptions.AgentPort = options?.UdpPort ?? 6831;
 
-                    var senderType = string.IsNullOrWhiteSpace(options.Sender) ? "udp" : options.Sender?.ToLowerInvariant();
+                        var senderType = string.IsNullOrWhiteSpace(options.Sender) ? "udp" : options.Sender?.ToLowerInvariant();
 
-                    jaegerOptions.Protocol = senderType switch
-                    {
-                        "http" => JaegerExportProtocol.HttpBinaryThrift,
-                        "udp" => JaegerExportProtocol.UdpCompactThrift,
-                        _ => throw new InvalidOperationException($"Invalid Jaeger sender type: '{senderType}'.")
-                    };
+                        jaegerOptions.Protocol = senderType switch
+                        {
+                            "http" => JaegerExportProtocol.HttpBinaryThrift,
+                            "udp" => JaegerExportProtocol.UdpCompactThrift,
+                            _ => throw new InvalidOperationException($"Invalid Jaeger sender type: '{senderType}'.")
+                        };
 
-                    jaegerOptions.MaxPayloadSizeInBytes = options.MaxPacketSize <= 0 ? 4096 : options.MaxPacketSize;
+                        jaegerOptions.MaxPayloadSizeInBytes = options.MaxPacketSize <= 0 ? 4096 : options.MaxPacketSize;
 
-                    if (senderType == "http" && options.HttpSender is not null)
-                    {
-                        jaegerOptions.Endpoint = new Uri(options.HttpSender.Endpoint ?? "http://localhost:14268/api/traces");
-                        jaegerOptions.MaxPayloadSizeInBytes = options.HttpSender.MaxPacketSize <= 0 ? 4096 : options.HttpSender.MaxPacketSize;
-                    }
-                })
-        );
+                        if (senderType == "http" && options.HttpSender is not null)
+                        {
+                            jaegerOptions.Endpoint = new Uri(options.HttpSender.Endpoint ?? "http://localhost:14268/api/traces");
+                            jaegerOptions.MaxPayloadSizeInBytes = options.HttpSender.MaxPacketSize <= 0 ? 4096 : options.HttpSender.MaxPacketSize;
+                        }
+                    })
+                );
 
         builder.Services.AddSingleton<ITracer>(serviceProvider =>
         {
-            var appOptions = serviceProvider.GetRequiredService<AppOptions>();
             var traceProvider = serviceProvider.GetRequiredService<TracerProvider>();
-            var tracer = new TracerShim(traceProvider.GetTracer(appOptions.Name), Propagators.DefaultTextMapPropagator);
+            var tracer = new TracerShim(traceProvider, Propagators.DefaultTextMapPropagator);
             GlobalTracer.RegisterIfAbsent(tracer);
             return tracer;
         });

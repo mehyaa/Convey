@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Convey.Secrets.Vault.Internals;
 using Microsoft.AspNetCore.Hosting;
@@ -8,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods;
 using VaultSharp.V1.AuthMethods.Token;
@@ -125,7 +125,7 @@ public static class Extensions
             var keyValueSecrets = new KeyValueSecrets(client, options);
             var secret = await keyValueSecrets.GetAsync(kvPath);
             var parser = new JsonParser();
-            var json = JsonConvert.SerializeObject(secret);
+            var json = JsonSerializer.Serialize(secret);
             var data = parser.Parse(json);
             var source = new MemoryConfigurationSource {InitialData = data};
             builder.Add(source);
