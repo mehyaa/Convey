@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Figgle" Version="0.4.1" />
-    <PackageReference Include="Scrutor" Version="4.2.0" />
+    <PackageReference Include="Figgle" Version="0.5.1" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
   </ItemGroup>
 
   <ItemGroup>
