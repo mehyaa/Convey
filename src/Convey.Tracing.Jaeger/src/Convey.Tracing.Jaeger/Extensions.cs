@@ -1,6 +1,5 @@
 using Convey.Tracing.Jaeger.Builders;
 using Convey.Tracing.Jaeger.Tracers;
-using Convey.Types;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Context.Propagation;
@@ -97,7 +96,6 @@ public static class Extensions
 
         builder.Services.AddSingleton<ITracer>(serviceProvider =>
         {
-            var appOptions = serviceProvider.GetRequiredService<AppOptions>();
             var traceProvider = serviceProvider.GetRequiredService<TracerProvider>();
             var tracer = new TracerShim(traceProvider, Propagators.DefaultTextMapPropagator);
             GlobalTracer.RegisterIfAbsent(tracer);
