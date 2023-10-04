@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Convey.CQRS.Commands;
 using Convey.CQRS.Queries;
@@ -36,7 +37,7 @@ public class DispatcherEndpointsBuilder : IDispatcherEndpointsBuilder
         {
             if (beforeDispatch is not null)
             {
-                await beforeDispatch(query, ctx);
+                await beforeDispatch.Invoke(query, ctx);
             }
 
             var dispatcher = ctx.RequestServices.GetRequiredService<IQueryDispatcher>();
@@ -45,7 +46,7 @@ public class DispatcherEndpointsBuilder : IDispatcherEndpointsBuilder
             {
                 if (result is null)
                 {
-                    ctx.Response.StatusCode = 404;
+                    ctx.Response.StatusCode = (int)HttpStatusCode.NoContent;
                     return;
                 }
 
@@ -53,7 +54,7 @@ public class DispatcherEndpointsBuilder : IDispatcherEndpointsBuilder
                 return;
             }
 
-            await afterDispatch(query, result, ctx);
+            await afterDispatch.Invoke(query, result, ctx);
         }, endpoint, auth, roles, policies);
 
         return this;
@@ -141,18 +142,18 @@ public class DispatcherEndpointsBuilder : IDispatcherEndpointsBuilder
         {
             if (beforeDispatch is not null)
             {
-                await beforeDispatch(query, ctx);
+                await beforeDispatch.Invoke(query, ctx);
             }
 
             var dispatcher = ctx.RequestServices.GetRequiredService<IQueryDispatcher>();
             var result = await dispatcher.QueryAsync<T, bool>(query);
             if (afterDispatch is null)
             {
-                ctx.Response.StatusCode = result ? 200 : 404;
+                ctx.Response.StatusCode = result ? (int)HttpStatusCode.OK : (int)HttpStatusCode.NotFound;
                 return;
             }
 
-            await afterDispatch(query, result, ctx);
+            await afterDispatch.Invoke(query, result, ctx);
         }, endpoint, auth, roles, policies);
 
         return this;
@@ -164,17 +165,17 @@ public class DispatcherEndpointsBuilder : IDispatcherEndpointsBuilder
     {
         if (beforeDispatch is not null)
         {
-            await beforeDispatch(command, context);
+            await beforeDispatch.Invoke(command, context);
         }
 
         var dispatcher = context.RequestServices.GetRequiredService<ICommandDispatcher>();
         await dispatcher.SendAsync(command);
         if (afterDispatch is null)
         {
-            context.Response.StatusCode = 200;
+            context.Response.StatusCode = (int)HttpStatusCode.OK;
             return;
         }
 
-        await afterDispatch(command, context);
+        await afterDispatch.Invoke(command, context);
     }
 }
