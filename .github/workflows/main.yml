@@ -13,7 +13,8 @@ jobs:
     env:
       BUILD_CONFIG: 'Release'
       SOLUTION: 'Convey.sln'
-      DOTNET_VERSION: 7.0.100
+      DOTNET_VERSION: 8
+      DOTNET_SDK_VERSION: 8.0.100
 
     runs-on: ubuntu-latest
 
@@ -21,7 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
     - name: Get Year
       id: date
@@ -42,7 +43,7 @@ jobs:
       run: dotnet restore $SOLUTION --verbosity minimal
 
     - name: Build
-      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal /p:Version="${{ steps.date.outputs.formattedTime }}.0.${{ github.run_number }}"
+      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal /p:Version="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}"
 
     - name: Run Tests
       run: dotnet test --configuration $BUILD_CONFIG --no-restore --no-build --verbosity minimal

@@ -52,7 +52,7 @@ public class Program
                                 .SerializeAsync(ctx.Response.Body, new PricingDto
                                 {
                                     OrderId = query.OrderId, TotalAmount = 20.50m
-                                }))))
-                .UseLogging();
-        });
+                                }))));
+        })
+        .UseLogging();
 }

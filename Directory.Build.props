@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
     <Authors>mehyaa,DevMentors.io</Authors>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
@@ -26,5 +26,5 @@
     <Exec Command="dotnet nuget push $(OutputPath)..\$(PackageId).$(Version).nupkg --source $(UserProfile)\\.nuget\\$(PackageTarget)\" />
     <Exec Command="rmdir /q /s $(UserProfile)\\.nuget\\packages\\$(MSBuildProjectName.ToLower())\\$(Version)\"></Exec>
   </Target>
-  
+
 </Project>

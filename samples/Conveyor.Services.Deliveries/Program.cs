@@ -47,7 +47,7 @@ public class Program
                         .Get("ping", ctx => ctx.Response.WriteAsync("pong")))
                     .UseJaeger()
                     .UseRabbitMq()
-                    .SubscribeEvent<OrderCreated>())
-                .UseLogging();
-        });
+                    .SubscribeEvent<OrderCreated>());
+        })
+        .UseLogging();
 }

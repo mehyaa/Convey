@@ -2,7 +2,6 @@ using Convey.Logging.Options;
 using Convey.Types;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,32 +46,6 @@ public static class Extensions
                 var appOptions = context.Configuration.GetOptions<AppOptions>(appSectionName);
 
                 MapOptions(loggerOptions, appOptions, loggerConfiguration, context.HostingEnvironment.EnvironmentName);
-                configure?.Invoke(context, loggerConfiguration);
-            });
-
-    [Obsolete("Prefer UseLogging() on IHostBuilder")]
-    public static IWebHostBuilder UseLogging(this IWebHostBuilder webHostBuilder,
-        Action<WebHostBuilderContext, LoggerConfiguration> configure = null, string loggerSectionName = LoggerSectionName,
-        string appSectionName = AppSectionName)
-        => webHostBuilder
-            .ConfigureServices(services => services.AddSingleton<ILoggingService, LoggingService>())
-            .UseSerilog((context, loggerConfiguration) =>
-            {
-                if (string.IsNullOrWhiteSpace(loggerSectionName))
-                {
-                    loggerSectionName = LoggerSectionName;
-                }
-
-                if (string.IsNullOrWhiteSpace(appSectionName))
-                {
-                    appSectionName = AppSectionName;
-                }
-
-                var loggerOptions = context.Configuration.GetOptions<LoggerOptions>(loggerSectionName);
-                var appOptions = context.Configuration.GetOptions<AppOptions>(appSectionName);
-
-                MapOptions(loggerOptions, appOptions, loggerConfiguration,
-                    context.HostingEnvironment.EnvironmentName);
                 configure?.Invoke(context, loggerConfiguration);
             });
 
