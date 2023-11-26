@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -26,7 +27,7 @@ internal sealed class PrometheusMiddleware : IMiddleware
         {
             return next(context);
         }
-            
+
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
             return next(context);
@@ -45,7 +46,7 @@ internal sealed class PrometheusMiddleware : IMiddleware
 
         if (!request.Headers.TryGetValue("x-forwarded-for", out var forwardedFor))
         {
-            context.Response.StatusCode = 404;
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             return Task.CompletedTask;
         }
 
@@ -53,8 +54,8 @@ internal sealed class PrometheusMiddleware : IMiddleware
         {
             return next(context);
         }
-            
-        context.Response.StatusCode = 404;
+
+        context.Response.StatusCode = (int)HttpStatusCode.NotFound;
         return Task.CompletedTask;
     }
 }

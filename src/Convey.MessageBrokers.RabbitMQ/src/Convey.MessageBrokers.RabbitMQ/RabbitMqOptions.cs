@@ -21,7 +21,6 @@ public class RabbitMqOptions
     public TimeSpan? MessageProcessingTimeout { get; set; }
     public ushort RequestedChannelMax { get; set; }
     public uint RequestedFrameMax { get; set; }
-    public bool UseBackgroundThreadsForIO { get; set; }
     public string ConventionsCasing { get; set; }
     public int Retries { get; set; }
     public int RetryInterval { get; set; }
@@ -62,7 +61,7 @@ public class RabbitMqOptions
         public bool Durable { get; set; }
         public bool AutoDelete { get; set; }
     }
-        
+
     public class QueueOptions
     {
         public string Template { get; set; }
@@ -103,7 +102,7 @@ public class RabbitMqOptions
     public class ConventionsOptions
     {
         public MessageAttributeOptions MessageAttribute { get; set; }
-            
+
         public class MessageAttributeOptions
         {
             public bool IgnoreExchange { get; set; }

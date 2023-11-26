@@ -19,6 +19,16 @@ public interface IDispatcherEndpointsBuilder
         Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
         params string[] policies) where TQuery : class, IQuery<TResult>;
 
+    IDispatcherEndpointsBuilder Head(string path, Func<HttpContext, Task> context = null,
+        Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
+        params string[] policies);
+
+    IDispatcherEndpointsBuilder Head<T>(string path,
+        Func<T, HttpContext, Task> beforeDispatch = null,
+        Func<T, bool, HttpContext, Task> afterDispatch = null,
+        Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
+        params string[] policies) where T : class, IQuery<bool>;
+
     IDispatcherEndpointsBuilder Post(string path, Func<HttpContext, Task> context = null,
         Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
         params string[] policies);
@@ -39,6 +49,16 @@ public interface IDispatcherEndpointsBuilder
         params string[] policies)
         where T : class, ICommand;
 
+    IDispatcherEndpointsBuilder Patch(string path, Func<HttpContext, Task> context = null,
+        Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
+        params string[] policies);
+
+    IDispatcherEndpointsBuilder Patch<T>(string path, Func<T, HttpContext, Task> beforeDispatch = null,
+        Func<T, HttpContext, Task> afterDispatch = null, Action<IEndpointConventionBuilder> endpoint = null,
+        bool auth = false, string roles = null,
+        params string[] policies)
+        where T : class, ICommand;
+
     IDispatcherEndpointsBuilder Delete(string path, Func<HttpContext, Task> context = null,
         Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
         params string[] policies);
@@ -48,14 +68,4 @@ public interface IDispatcherEndpointsBuilder
         bool auth = false, string roles = null,
         params string[] policies)
         where T : class, ICommand;
-
-    IDispatcherEndpointsBuilder Head(string path, Func<HttpContext, Task> context = null,
-        Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
-        params string[] policies);
-
-    IDispatcherEndpointsBuilder Head<T>(string path,
-        Func<T, HttpContext, Task> beforeDispatch = null,
-        Func<T, bool, HttpContext, Task> afterDispatch = null,
-        Action<IEndpointConventionBuilder> endpoint = null, bool auth = false, string roles = null,
-        params string[] policies) where T : class, IQuery<bool>;
 }

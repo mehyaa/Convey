@@ -175,7 +175,7 @@ public static class Extensions
     private static TModel Bind<TModel, TProperty>(this TModel model, Expression<Func<TModel, TProperty>> expression,
         object value)
     {
-        if (!(expression.Body is MemberExpression memberExpression))
+        if (expression.Body is not MemberExpression memberExpression)
         {
             memberExpression = ((UnaryExpression) expression.Body).Operand as MemberExpression;
         }
@@ -188,7 +188,7 @@ public static class Extensions
         var propertyName = memberExpression.Member.Name.ToLowerInvariant();
         var modelType = model.GetType();
         var field = modelType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-            .SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith($"<{propertyName}>"));
+            .SingleOrDefault(x => x.Name.StartsWith($"<{propertyName}>", StringComparison.InvariantCultureIgnoreCase));
         if (field is null)
         {
             return model;
@@ -201,13 +201,13 @@ public static class Extensions
 
     public static Task Ok(this HttpResponse response, object data = null)
     {
-        response.StatusCode = 200;
+        response.StatusCode = (int)HttpStatusCode.OK;
         return data is null ? Task.CompletedTask : response.WriteJsonAsync(data);
     }
 
     public static Task Created(this HttpResponse response, string location = null, object data = null)
     {
-        response.StatusCode = 201;
+        response.StatusCode = (int)HttpStatusCode.Created;
         if (string.IsNullOrWhiteSpace(location))
         {
             return Task.CompletedTask;
@@ -215,7 +215,7 @@ public static class Extensions
 
         if (!response.Headers.ContainsKey(LocationHeader))
         {
-            response.Headers.Add(LocationHeader, location);
+            response.Headers.Append(LocationHeader, location);
         }
 
         return data is null ? Task.CompletedTask : response.WriteJsonAsync(data);
@@ -238,7 +238,7 @@ public static class Extensions
         response.StatusCode = (int) HttpStatusCode.MovedPermanently;
         if (!response.Headers.ContainsKey(LocationHeader))
         {
-            response.Headers.Add(LocationHeader, url);
+            response.Headers.Append(LocationHeader, url);
         }
 
         return Task.CompletedTask;
@@ -249,7 +249,7 @@ public static class Extensions
         response.StatusCode = (int) HttpStatusCode.PermanentRedirect;
         if (!response.Headers.ContainsKey(LocationHeader))
         {
-            response.Headers.Add(LocationHeader, url);
+            response.Headers.Append(LocationHeader, url);
         }
 
         return Task.CompletedTask;
@@ -292,15 +292,15 @@ public static class Extensions
         await serializer.SerializeAsync(response.Body, value);
     }
 
-    public static async Task<T> ReadJsonAsync<T>(this HttpContext httpContext)
+    public static async Task<TRequest> ReadJsonAsync<TRequest>(this HttpContext httpContext)
     {
         var logger = httpContext.RequestServices.GetService<ILogger>();
 
         if (httpContext.Request.Body is null)
         {
             logger?.LogError("Null request body received.");
-            httpContext.Response.StatusCode = 400;
-            await httpContext.Response.Body.WriteAsync(InvalidJsonRequestBytes, 0, InvalidJsonRequestBytes.Length);
+            httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            await httpContext.Response.Body.WriteAsync(InvalidJsonRequestBytes);
 
             return default;
         }
@@ -308,15 +308,14 @@ public static class Extensions
         try
         {
             var request = httpContext.Request;
-            var payload = await httpContext.RequestServices.GetRequiredService<IJsonSerializer>().DeserializeAsync<T>(request.Body);
+            var payload = await httpContext.RequestServices.GetRequiredService<IJsonSerializer>().DeserializeAsync<TRequest>(request.Body);
             if (_bindRequestFromRoute && HasRouteData(request))
             {
                 var values = request.HttpContext.GetRouteData().Values;
                 foreach (var (key, value) in values)
                 {
                     var field = payload.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-                        .SingleOrDefault(f => f.Name.ToLowerInvariant().StartsWith($"<{key}>",
-                            StringComparison.InvariantCultureIgnoreCase));
+                        .SingleOrDefault(f => f.Name.StartsWith($"<{key}>", StringComparison.InvariantCultureIgnoreCase));
 
                     if (field is null)
                     {
@@ -335,7 +334,7 @@ public static class Extensions
                 return payload;
             }
 
-            httpContext.Response.StatusCode = 400;
+            httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             await httpContext.Response.WriteJsonAsync(results);
 
             return default;
@@ -344,14 +343,14 @@ public static class Extensions
         {
             logger?.LogError(ex, "Exception thrown while deserializing request.");
 
-            httpContext.Response.StatusCode = 400;
-            await httpContext.Response.Body.WriteAsync(InvalidJsonRequestBytes, 0, InvalidJsonRequestBytes.Length);
+            httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            await httpContext.Response.Body.WriteAsync(InvalidJsonRequestBytes);
 
             return default;
         }
     }
 
-    public static T ReadQuery<T>(this HttpContext context) where T : class
+    public static TRequest ReadQuery<TRequest>(this HttpContext context) where TRequest : class
     {
         var request = context.Request;
         RouteValueDictionary values = null;
@@ -363,7 +362,7 @@ public static class Extensions
         if (HasQueryString(request))
         {
             var queryString = HttpUtility.ParseQueryString(request.HttpContext.Request.QueryString.Value);
-            values ??= new RouteValueDictionary();
+            values ??= [];
             foreach (var key in queryString.AllKeys)
             {
                 values.TryAdd(key, queryString[key]);
@@ -373,7 +372,7 @@ public static class Extensions
         var serializer = context.RequestServices.GetRequiredService<IJsonSerializer>();
         if (values is null)
         {
-            return serializer.Deserialize<T>(EmptyJsonObject);
+            return serializer.Deserialize<TRequest>(EmptyJsonObject);
         }
 
         var serialized = serializer.Serialize(values.ToDictionary(k => k.Key, k => k.Value))
@@ -383,7 +382,7 @@ public static class Extensions
             .Replace("\"[", "[")
             .Replace("]\"", "]");
 
-        return serializer.Deserialize<T>(serialized);
+        return serializer.Deserialize<TRequest>(serialized);
     }
 
     private static bool HasQueryString(this HttpRequest request)

@@ -11,6 +11,9 @@ public interface IHttpClient
     Task<HttpResponseMessage> GetAsync(string uri);
     Task<T> GetAsync<T>(string uri, IHttpClientSerializer serializer = null);
     Task<HttpResult<T>> GetResultAsync<T>(string uri, IHttpClientSerializer serializer = null);
+    Task<HttpResponseMessage> HeadAsync(string uri);
+    Task<bool?> HeadAsync(string uri, IHttpClientSerializer serializer = null);
+    Task<HttpResult<bool?>> HeadResultAsync(string uri, IHttpClientSerializer serializer = null);
     Task<HttpResponseMessage> PostAsync(string uri, object data = null, IHttpClientSerializer serializer = null);
     Task<HttpResponseMessage> PostAsync(string uri, HttpContent content);
     Task<T> PostAsync<T>(string uri, object data = null, IHttpClientSerializer serializer = null);

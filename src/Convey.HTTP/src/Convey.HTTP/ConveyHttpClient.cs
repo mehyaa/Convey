@@ -1,11 +1,12 @@
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Polly;
 
 namespace Convey.HTTP;
 
@@ -45,6 +46,43 @@ public class ConveyHttpClient : IHttpClient
 
     public Task<HttpResult<T>> GetResultAsync<T>(string uri, IHttpClientSerializer serializer = null)
         => SendResultAsync<T>(uri, Method.Get, serializer: serializer);
+
+    public virtual Task<HttpResponseMessage> HeadAsync(string uri)
+        => SendAsync(uri, Method.Head);
+
+    public virtual async Task<bool?> HeadAsync(string uri, IHttpClientSerializer serializer = null)
+    {
+        var response = await SendAsync(uri, Method.Head);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            return true;
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return false;
+        }
+
+        return null;
+    }
+
+    public async Task<HttpResult<bool?>> HeadResultAsync(string uri, IHttpClientSerializer serializer = null)
+    {
+        var response = await SendAsync(uri, Method.Head);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            return new HttpResult<bool?>(true, response);
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new HttpResult<bool?>(false, response);
+        }
+
+        return new HttpResult<bool?>(null, response);
+    }
 
     public virtual Task<HttpResponseMessage> PostAsync(string uri, object data = null,
         IHttpClientSerializer serializer = null)
@@ -221,6 +259,7 @@ public class ConveyHttpClient : IHttpClient
         => method switch
         {
             Method.Get => _client.GetAsync(uri),
+            Method.Head => _client.SendAsync(new HttpRequestMessage { RequestUri = new Uri(uri, UriKind.RelativeOrAbsolute), Method = HttpMethod.Head }),
             Method.Post => _client.PostAsync(uri, content),
             Method.Put => _client.PutAsync(uri, content),
             Method.Patch => _client.PatchAsync(uri, content),
@@ -259,6 +298,7 @@ public class ConveyHttpClient : IHttpClient
     protected enum Method
     {
         Get,
+        Head,
         Post,
         Put,
         Patch,

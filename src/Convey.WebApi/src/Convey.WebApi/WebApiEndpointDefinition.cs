@@ -14,7 +14,7 @@ public class WebApiEndpointDefinition
     public IEnumerable<WebApiEndpointParameter> Parameters { get; set; } = new List<WebApiEndpointParameter>();
     public IEnumerable<WebApiEndpointResponse> Responses { get; set; } = new List<WebApiEndpointResponse>();
 }
-    
+
 public class WebApiEndpointParameter
 {
     public string In { get; set; }
@@ -22,7 +22,7 @@ public class WebApiEndpointParameter
     public string Name { get; set; }
     public object Example { get; set; }
 }
-    
+
 public class WebApiEndpointResponse
 {
     public Type Type { get; set; }

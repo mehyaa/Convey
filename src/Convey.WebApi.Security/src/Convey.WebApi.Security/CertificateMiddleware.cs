@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -69,7 +70,7 @@ internal sealed class CertificateMiddleware : IMiddleware
         var certificate = context.Connection.ClientCertificate;
         if (certificate is null || !Verify(certificate))
         {
-            context.Response.StatusCode = 401;
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             return Task.CompletedTask;
         }
 
@@ -146,12 +147,12 @@ internal sealed class CertificateMiddleware : IMiddleware
         {
             chainElement.Certificate.Dispose();
         }
-            
+
         if (chainBuilt)
         {
             return true;
         }
-            
+
         _logger.LogError("Certificate validation failed");
         foreach (var chainStatus in chain.ChainStatus)
         {

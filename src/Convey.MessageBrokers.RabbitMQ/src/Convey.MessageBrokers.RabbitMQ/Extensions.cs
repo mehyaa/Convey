@@ -64,7 +64,7 @@ public static class Extensions
         builder.Services.AddTransient<RabbitMqExchangeInitializer>();
         builder.Services.AddHostedService<RabbitMqBackgroundService>();
         builder.AddInitializer<RabbitMqExchangeInitializer>();
-            
+
         if (serializer is not null)
         {
             builder.Services.AddSingleton(serializer);
@@ -91,7 +91,6 @@ public static class Extensions
             SocketWriteTimeout = options.SocketWriteTimeout,
             RequestedChannelMax = options.RequestedChannelMax,
             RequestedFrameMax = options.RequestedFrameMax,
-            UseBackgroundThreadsForIO = options.UseBackgroundThreadsForIO,
             DispatchConsumersAsync = true,
             ContinuationTimeout = options.ContinuationTimeout,
             HandshakeContinuationTimeout = options.HandshakeContinuationTimeout,
@@ -185,7 +184,7 @@ public static class Extensions
         builder.Services.AddSingleton<IExceptionToMessageMapper, T>();
         return builder;
     }
-        
+
     public static IConveyBuilder AddExceptionToFailedMessageMapper<T>(this IConveyBuilder builder)
         where T : class, IExceptionToFailedMessageMapper
     {

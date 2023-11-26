@@ -10,9 +10,10 @@ namespace Convey.WebApi.Swagger.Filters;
 
 internal sealed class WebApiDocumentFilter : IDocumentFilter
 {
-    private readonly WebApiEndpointDefinitions _definitions;
     private const string InBody = "body";
     private const string InQuery = "query";
+
+    private readonly WebApiEndpointDefinitions _definitions;
 
     private readonly Func<OpenApiPathItem, string, OpenApiOperation> _getOperation = (item, path) =>
     {
@@ -30,6 +31,15 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
             case "DELETE":
                 item.AddOperation(OperationType.Delete, new OpenApiOperation());
                 return item.Operations[OperationType.Delete];
+            case "HEAD":
+                item.AddOperation(OperationType.Head, new OpenApiOperation());
+                return item.Operations[OperationType.Head];
+            case "PATCH":
+                item.AddOperation(OperationType.Patch, new OpenApiOperation());
+                return item.Operations[OperationType.Patch];
+            case "OPTIONS":
+                item.AddOperation(OperationType.Options, new OpenApiOperation());
+                return item.Operations[OperationType.Options];
         }
 
         return null;
@@ -49,7 +59,7 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
             foreach (var methodDefinition in pathDefinition)
             {
                 var operation = _getOperation(pathItem, methodDefinition.Method);
-                operation.Responses = new OpenApiResponses();
+                operation.Responses = [];
                 operation.Parameters = new List<OpenApiParameter>();
 
                 foreach (var parameter in methodDefinition.Parameters)
@@ -66,8 +76,9 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                         Schema = new OpenApiSchema
                                         {
                                             Type = parameter.Type.Name,
-                                            Example = new OpenApiString(JsonSerializer.Serialize(parameter.Example,
-                                                jsonSerializerOptions))
+                                            Example = new OpenApiString(
+                                                JsonSerializer.Serialize(parameter.Example,
+                                                    jsonSerializerOptions))
                                         }
                                     }
                                 }
@@ -105,8 +116,9 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                 Schema = new OpenApiSchema
                                 {
                                     Type = parameter.Type.Name,
-                                    Example = new OpenApiString(JsonSerializer.Serialize(parameter.Example,
-                                        jsonSerializerOptions))
+                                    Example = new OpenApiString(
+                                        JsonSerializer.Serialize(parameter.Example,
+                                            jsonSerializerOptions))
                                 }
                             });
                         }
@@ -125,8 +137,9 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                     Schema = new OpenApiSchema
                                     {
                                         Type = response.Type?.Name,
-                                        Example = new OpenApiString(JsonSerializer.Serialize(response.Example,
-                                            jsonSerializerOptions))
+                                        Example = new OpenApiString(
+                                            JsonSerializer.Serialize(response.Example,
+                                                jsonSerializerOptions))
                                     }
                                 }
                             }
