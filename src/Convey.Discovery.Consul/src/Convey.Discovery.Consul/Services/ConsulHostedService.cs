@@ -1,53 +1,117 @@
+using Convey.Discovery.Consul.Models;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Convey.Discovery.Consul.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Convey.Discovery.Consul.Services;
 
-internal sealed class ConsulHostedService : IHostedService
+internal sealed class ConsulHostedService : IHostedService, IAsyncDisposable
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IConsulService _consulService;
+    private readonly ServiceRegistration _serviceRegistration;
+    private readonly ConsulOptions _consulOptions;
     private readonly ILogger<ConsulHostedService> _logger;
 
-    public ConsulHostedService(IServiceProvider serviceProvider, ILogger<ConsulHostedService> logger)
+    private readonly CancellationTokenSource _cancellationTokenSource;
+
+    private Timer _timer;
+
+    public ConsulHostedService(
+        IConsulService consulService,
+        ServiceRegistration serviceRegistration,
+        ConsulOptions consulOptions,
+        ILogger<ConsulHostedService> logger)
     {
-        _serviceProvider = serviceProvider;
+        _consulService = consulService;
+        _serviceRegistration = serviceRegistration;
+        _consulOptions = consulOptions;
         _logger = logger;
+
+        _cancellationTokenSource = new CancellationTokenSource();
     }
-        
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var consulService = scope.ServiceProvider.GetRequiredService<IConsulService>();
-        var registration = scope.ServiceProvider.GetRequiredService<ServiceRegistration>();
-        _logger.LogInformation($"Registering a service [id: {registration.Id}] in Consul...");
-        var response = await consulService.RegisterServiceAsync(registration);
-        if (response.IsSuccessStatusCode)
+        if (!_consulOptions.Enabled)
         {
-            _logger.LogInformation($"Registered a service [id: {registration.Id}] in Consul.");
             return;
         }
 
-        _logger.LogError($"There was an error when registering a service [id: {registration.Id}] in Consul. {response}");
+        _logger.LogInformation("Registering service [id: {ServiceId}] to Consul...", _serviceRegistration.Id);
+
+        var response = await _consulService.RegisterServiceAsync(_serviceRegistration, cancellationToken);
+
+        try
+        {
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Registered service [id: {ServiceId}] to Consul", _serviceRegistration.Id);
+        }
+        catch (Exception ex)
+        {
+            var body = response.Content.ReadAsStringAsync(cancellationToken);
+
+            _logger.LogError(ex, "There was an error when registering service [id: {ServiceId}] to Consul: {Response}", _serviceRegistration.Id, body);
+
+            throw;
+        }
+
+        if (_consulOptions.TtlEnabled && _consulOptions.Ttl > 0)
+        {
+            var ttl = TimeSpan.FromSeconds(_consulOptions.Ttl);
+
+            _timer = new Timer(async _ =>
+            {
+                try
+                {
+                    if (!_cancellationTokenSource.IsCancellationRequested)
+                    {
+                        await _consulService.PassCheckAsync(_serviceRegistration.Id, _cancellationTokenSource.Token);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "There was an error when passing TTL check for service [id: {ServiceId}] to Consul", _serviceRegistration.Id);
+                }
+            },
+            null,
+            ttl,
+            ttl);
+        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var consulService = scope.ServiceProvider.GetRequiredService<IConsulService>();
-        var registration = scope.ServiceProvider.GetRequiredService<ServiceRegistration>();
-        _logger.LogInformation($"Deregistering a service [id: {registration.Id}] from Consul...");
-        var response = await consulService.DeregisterServiceAsync(registration.Id);
-        if (response.IsSuccessStatusCode)
+        _cancellationTokenSource.Cancel();
+
+        if (!_consulOptions.Enabled)
         {
-            _logger.LogInformation($"Deregistered a service [id: {registration.Id}] from Consul.");
             return;
         }
 
-        _logger.LogError($"There was an error when deregistering a service [id: {registration.Id}] from Consul. {response}");
+        _logger.LogInformation("Deregistering service [id: {ServiceId}] from Consul...", _serviceRegistration.Id);
+
+        var response = await _consulService.DeregisterServiceAsync(_serviceRegistration.Id, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _logger.LogInformation("Deregistered service [id: {ServiceId}] from Consul", _serviceRegistration.Id);
+
+            return;
+        }
+
+        var body = response.Content.ReadAsStringAsync(cancellationToken);
+
+        _logger.LogError("There was an error when deregistering service [id: {ServiceId}] from Consul: {Response}", _serviceRegistration.Id, body);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_timer is not null)
+        {
+            await _timer.DisposeAsync();
+        }
     }
 }
