@@ -1,5 +1,5 @@
-using System.Threading.Tasks;
 using Convey.Discovery.Consul.Models;
+using System.Threading.Tasks;
 
 namespace Convey.Discovery.Consul;
 

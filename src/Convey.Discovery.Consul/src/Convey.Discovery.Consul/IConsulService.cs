@@ -1,8 +1,8 @@
+using Convey.Discovery.Consul.Models;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Convey.Discovery.Consul.Models;
 
 namespace Convey.Discovery.Consul;
 

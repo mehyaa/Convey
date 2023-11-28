@@ -51,7 +51,7 @@ internal sealed class ConsulHostedService : IHostedService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            var body = response.Content.ReadAsStringAsync(cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
             _logger.LogError(ex, "There was an error when registering service [id: {ServiceId}] to Consul: {Response}", _serviceRegistration.Id, body);
 
@@ -60,7 +60,7 @@ internal sealed class ConsulHostedService : IHostedService, IAsyncDisposable
 
         if (_consulOptions.TtlEnabled && _consulOptions.Ttl > 0)
         {
-            var ttl = TimeSpan.FromSeconds(_consulOptions.Ttl);
+            var ttl = TimeSpan.FromSeconds(_consulOptions.Ttl <= 5 ? _consulOptions.Ttl * 0.8 : _consulOptions.Ttl - 2);
 
             _timer = new Timer(async _ =>
             {
@@ -68,7 +68,11 @@ internal sealed class ConsulHostedService : IHostedService, IAsyncDisposable
                 {
                     if (!_cancellationTokenSource.IsCancellationRequested)
                     {
+                        _logger.LogDebug("Passing TTL check for service [id: {ServiceId}] to Consul...", _serviceRegistration.Id);
+
                         await _consulService.PassCheckAsync(_serviceRegistration.Id, _cancellationTokenSource.Token);
+
+                        _logger.LogDebug("TTL check for service [id: {ServiceId}] passed to Consul", _serviceRegistration.Id);
                     }
                 }
                 catch (Exception ex)
@@ -102,7 +106,7 @@ internal sealed class ConsulHostedService : IHostedService, IAsyncDisposable
             return;
         }
 
-        var body = response.Content.ReadAsStringAsync(cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
         _logger.LogError("There was an error when deregistering service [id: {ServiceId}] from Consul: {Response}", _serviceRegistration.Id, body);
     }

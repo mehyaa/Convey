@@ -7,16 +7,17 @@ using Convey.HTTP;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Convey.Discovery.Consul;
 
 public static class Extensions
 {
-    private const string DefaultInterval = "5s";
-    private const string SectionName = "consul";
     private const string RegistryName = "discovery.consul";
+    private const string SectionName = "consul";
+
+    private const string DefaultInterval = "5s";
 
     public static IConveyBuilder AddConsul(
         this IConveyBuilder builder,
@@ -48,11 +49,39 @@ public static class Extensions
         ConsulOptions options,
         HttpClientOptions httpClientOptions)
     {
-        builder.Services.AddSingleton(options);
+        var enabled = options.Enabled;
 
-        if (!options.Enabled || !builder.TryRegister(RegistryName))
+        var consulEnabled = Environment.GetEnvironmentVariable("CONSUL_ENABLED")?.ToLowerInvariant();
+
+        if (!string.IsNullOrWhiteSpace(consulEnabled))
+        {
+            enabled = consulEnabled is "true" or "1";
+        }
+
+        if (!enabled)
+        {
+            return null;
+        }
+
+        if (!builder.TryRegister(RegistryName))
         {
             return builder;
+        }
+
+        if (string.IsNullOrWhiteSpace(options.Address))
+        {
+            throw new OperationCanceledException("Consul address can not be empty");
+        }
+
+        builder.Services.AddSingleton(options);
+
+        builder.Services.AddHttpClient<IConsulService, ConsulService>(c => c.BaseAddress = new Uri(options.Url));
+
+        builder.Services.AddTransient<IConsulServicesRegistry, ConsulServicesRegistry>();
+
+        if (builder.Services.All(x => x.ServiceType != typeof(ConsulHostedService)))
+        {
+            builder.Services.AddHostedService<ConsulHostedService>();
         }
 
         if (httpClientOptions.Type?.ToLowerInvariant() == "consul")
@@ -68,54 +97,6 @@ public static class Extensions
                 .AddHttpMessageHandler<ConsulServiceDiscoveryMessageHandler>();
         }
 
-        builder.Services.AddTransient<IConsulServicesRegistry, ConsulServicesRegistry>();
-
-        var registration = builder.CreateConsulAgentRegistration(options);
-
-        if (registration is null)
-        {
-            return builder;
-        }
-
-        builder.Services.AddSingleton(registration);
-
-        return builder;
-    }
-
-    public static void AddConsulHttpClient(this IConveyBuilder builder, string clientName, string serviceName)
-        => builder.Services.AddHttpClient<IHttpClient, ConsulHttpClient>(clientName)
-            .AddHttpMessageHandler(c => new ConsulServiceDiscoveryMessageHandler(
-                c.GetRequiredService<IConsulServicesRegistry>(),
-                c.GetRequiredService<ConsulOptions>(), serviceName, true));
-
-    private static ServiceRegistration CreateConsulAgentRegistration(this IConveyBuilder builder, ConsulOptions options)
-    {
-        var enabled = options.Enabled;
-
-        var consulEnabled = Environment.GetEnvironmentVariable("CONSUL_ENABLED")?.ToLowerInvariant();
-
-        if (!string.IsNullOrWhiteSpace(consulEnabled))
-        {
-            enabled = consulEnabled is "true" or "1";
-        }
-
-        if (!enabled)
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(options.Address))
-        {
-            throw new ArgumentException("Consul address can not be empty", nameof(options.PingEndpoint));
-        }
-
-        builder.Services.AddHttpClient<IConsulService, ConsulService>(c => c.BaseAddress = new Uri(options.Url));
-
-        if (builder.Services.All(x => x.ServiceType != typeof(ConsulHostedService)))
-        {
-            builder.Services.AddHostedService<ConsulHostedService>();
-        }
-
         string serviceId;
 
         using (var serviceProvider = builder.Services.BuildServiceProvider())
@@ -123,6 +104,27 @@ public static class Extensions
             serviceId = serviceProvider.GetRequiredService<IServiceId>().Id;
         }
 
+        var registration = CreateConsulAgentRegistration(options, serviceId);
+
+        if (registration is not null)
+        {
+            builder.Services.AddSingleton(registration);
+        }
+
+        return builder;
+    }
+
+    public static void AddConsulHttpClient(this IConveyBuilder builder, string clientName, string serviceName)
+        => builder.Services.AddHttpClient<IHttpClient, ConsulHttpClient>(clientName)
+            .AddHttpMessageHandler(c =>
+                new ConsulServiceDiscoveryMessageHandler(
+                    c.GetRequiredService<IConsulServicesRegistry>(),
+                    c.GetRequiredService<ConsulOptions>(),
+                    serviceName,
+                    true));
+
+    private static ServiceRegistration CreateConsulAgentRegistration(ConsulOptions options, string serviceId)
+    {
         var registration = new ServiceRegistration
         {
             Id = serviceId,
@@ -156,7 +158,7 @@ public static class Extensions
 
             var check = new ServiceCheck
             {
-                Id = serviceId,
+                CheckId = serviceId,
                 Name = options.Service,
                 Http = $"{scheme}{options.Address}{(options.Port > 0 ? $":{options.Port}" : string.Empty)}{pingEndpoint}",
                 Interval = ParseTime(options.PingInterval),
@@ -172,7 +174,7 @@ public static class Extensions
         {
             var check = new ServiceCheck
             {
-                Id = serviceId,
+                CheckId = serviceId,
                 Name = options.Service,
                 Ttl = $"{options.Ttl}s",
                 FailuresBeforeWarning = options.WarningAfterFailure,
@@ -203,6 +205,6 @@ public static class Extensions
                 Dns.GetHostEntry(Dns.GetHostName()).AddressList,
                 i => i.AddressFamily == AddressFamily.InterNetwork);
 
-        return ip?.ToString() ?? throw new ArgumentException("IP address not found");
+        return ip?.ToString() ?? throw new OperationCanceledException("IP address not found");
     }
 }

@@ -8,8 +8,8 @@ namespace Convey.Discovery.Consul.Services;
 
 internal sealed class ConsulServicesRegistry : IConsulServicesRegistry
 {
-    private readonly Random _random = new();
     private readonly IConsulService _consulService;
+
     private readonly IDictionary<string, ISet<string>> _usedServices = new Dictionary<string, ISet<string>>();
 
     public ConsulServicesRegistry(IConsulService consulService)
@@ -20,6 +20,7 @@ internal sealed class ConsulServicesRegistry : IConsulServicesRegistry
     public async Task<ServiceAgent> GetAsync(string name)
     {
         var services = await _consulService.GetServiceAgentsAsync(name);
+
         if (!services.Any())
         {
             return null;
@@ -43,8 +44,10 @@ internal sealed class ConsulServicesRegistry : IConsulServicesRegistry
         {
             case 0:
                 return null;
+
             case 1:
-                return services.First().Value;
+                return services.Select(kv => kv.Value).First();
+
             default:
                 return ChooseService(services, name);
         }
@@ -53,14 +56,17 @@ internal sealed class ConsulServicesRegistry : IConsulServicesRegistry
     private ServiceAgent ChooseService(IDictionary<string, ServiceAgent> services, string name)
     {
         ServiceAgent service;
+
         var unusedServices = services.Where(s => !_usedServices[name].Contains(s.Key)).ToArray();
+
         if (unusedServices.Any())
         {
-            service = unusedServices.ElementAt(_random.Next(0, unusedServices.Count())).Value;
+            service = unusedServices[Random.Shared.Next(0, unusedServices.Length)].Value;
         }
         else
         {
-            service = unusedServices.First().Value;
+            service = unusedServices.Select(kv => kv.Value).First();
+
             _usedServices[name].Clear();
         }
 
