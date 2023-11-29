@@ -21,7 +21,8 @@ internal sealed class FabioMessageHandler : DelegatingHandler
         _servicePath = string.IsNullOrWhiteSpace(serviceName) ? string.Empty : $"{serviceName}/";
     }
 
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+    protected override Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
         if (!_options.Enabled)

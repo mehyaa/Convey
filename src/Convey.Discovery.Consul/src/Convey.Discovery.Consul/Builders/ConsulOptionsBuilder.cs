@@ -1,6 +1,6 @@
 namespace Convey.Discovery.Consul.Builders;
 
-internal sealed class ConsulOptionsBuilder : IConsulOptionsBuilder
+public sealed class ConsulOptionsBuilder : IConsulOptionsBuilder
 {
     private readonly ConsulOptions _options = new();
 

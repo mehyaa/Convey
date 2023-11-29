@@ -23,5 +23,5 @@ public class ServiceCheck
     public int FailuresBeforeCritical { get; set; } = 3;
     public string DeregisterCriticalServiceAfter { get; set; } = "5s";
 
-    public List<string> Args { get; set; }
+    public IList<string> Args { get; set; }
 }

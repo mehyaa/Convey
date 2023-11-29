@@ -1,54 +1,80 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Convey.Discovery.Consul;
+using Convey.Discovery.Consul.Builders;
 using Convey.Discovery.Consul.Models;
 using Convey.HTTP;
 using Convey.LoadBalancing.Fabio.Builders;
 using Convey.LoadBalancing.Fabio.Http;
 using Convey.LoadBalancing.Fabio.MessageHandlers;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Convey.LoadBalancing.Fabio;
 
 public static class Extensions
 {
-    private const string SectionName = "fabio";
     private const string RegistryName = "loadBalancing.fabio";
+    private const string SectionName = "fabio";
 
-    public static IConveyBuilder AddFabio(this IConveyBuilder builder, string sectionName = SectionName,
-        string consulSectionName = "consul", string httpClientSectionName = "httpClient")
+    public static IConveyBuilder AddFabio(
+        this IConveyBuilder builder,
+        string sectionName = SectionName,
+        string consulSectionName = "consul",
+        string httpClientSectionName = "httpClient")
     {
         if (string.IsNullOrWhiteSpace(sectionName))
         {
             sectionName = SectionName;
         }
-            
+
         var fabioOptions = builder.GetOptions<FabioOptions>(sectionName);
         var consulOptions = builder.GetOptions<ConsulOptions>(consulSectionName);
         var httpClientOptions = builder.GetOptions<HttpClientOptions>(httpClientSectionName);
-        return builder.AddFabio(fabioOptions, httpClientOptions,
+
+        return builder.AddFabio(
+            consulOptions,
+            fabioOptions,
+            httpClientOptions,
             b => b.AddConsul(consulOptions, httpClientOptions));
     }
 
-    public static IConveyBuilder AddFabio(this IConveyBuilder builder,
+    public static IConveyBuilder AddFabio(
+        this IConveyBuilder builder,
         Func<IFabioOptionsBuilder, IFabioOptionsBuilder> buildOptions,
         Func<IConsulOptionsBuilder, IConsulOptionsBuilder> buildConsulOptions,
         HttpClientOptions httpClientOptions)
     {
+        var consulOptions = buildConsulOptions.Invoke(new ConsulOptionsBuilder()).Build();
         var fabioOptions = buildOptions(new FabioOptionsBuilder()).Build();
-        return builder.AddFabio(fabioOptions, httpClientOptions,
+
+        return builder.AddFabio(
+            consulOptions,
+            fabioOptions,
+            httpClientOptions,
             b => b.AddConsul(buildConsulOptions, httpClientOptions));
     }
 
-    public static IConveyBuilder AddFabio(this IConveyBuilder builder, FabioOptions fabioOptions,
-        ConsulOptions consulOptions, HttpClientOptions httpClientOptions)
-        => builder.AddFabio(fabioOptions, httpClientOptions, b => b.AddConsul(consulOptions, httpClientOptions));
+    public static IConveyBuilder AddFabio(
+        this IConveyBuilder builder,
+        FabioOptions fabioOptions,
+        ConsulOptions consulOptions,
+        HttpClientOptions httpClientOptions)
+        => builder.AddFabio(
+            consulOptions,
+            fabioOptions,
+            httpClientOptions,
+            b => b.AddConsul(consulOptions, httpClientOptions));
 
-    private static IConveyBuilder AddFabio(this IConveyBuilder builder, FabioOptions fabioOptions,
-        HttpClientOptions httpClientOptions, Action<IConveyBuilder> registerConsul)
+    private static IConveyBuilder AddFabio(
+        this IConveyBuilder builder,
+        ConsulOptions consulOptions,
+        FabioOptions fabioOptions,
+        HttpClientOptions httpClientOptions,
+        Action<IConveyBuilder> registerConsul)
     {
-        registerConsul(builder);
+        registerConsul.Invoke(builder);
+
         builder.Services.AddSingleton(fabioOptions);
 
         if (!fabioOptions.Enabled || !builder.TryRegister(RegistryName))
@@ -59,28 +85,34 @@ public static class Extensions
         if (httpClientOptions.Type?.ToLowerInvariant() == "fabio")
         {
             builder.Services.AddTransient<FabioMessageHandler>();
+
             builder.Services.AddHttpClient<IFabioHttpClient, FabioHttpClient>("fabio-http")
                 .AddHttpMessageHandler<FabioMessageHandler>();
 
-
             builder.RemoveHttpClient();
+
             builder.Services.AddHttpClient<IHttpClient, FabioHttpClient>("fabio")
                 .AddHttpMessageHandler<FabioMessageHandler>();
         }
 
-        using var serviceProvider = builder.Services.BuildServiceProvider();
-        var registration = serviceProvider.GetRequiredService<ServiceRegistration>();
-        var tags = GetFabioTags(registration.Name, fabioOptions.Service);
+        var registration =
+            builder.Services.GetConsulRegistration() ??
+            throw new OperationCanceledException("No Consul service registration found");
+
+        var tags = GetFabioTags(consulOptions.Service, fabioOptions.Service);
+
         if (registration.Tags is null)
         {
             registration.Tags = tags;
         }
         else
         {
-            registration.Tags.AddRange(tags);
-        }
+            var allTags = registration.Tags.ToList();
 
-        builder.Services.UpdateConsulRegistration(registration);
+            allTags.AddRange(tags);
+
+            registration.Tags = allTags;
+        }
 
         return builder;
     }
@@ -89,19 +121,17 @@ public static class Extensions
         => builder.Services.AddHttpClient<IHttpClient, FabioHttpClient>(clientName)
             .AddHttpMessageHandler(c => new FabioMessageHandler(c.GetRequiredService<FabioOptions>(), serviceName));
 
-    private static void UpdateConsulRegistration(this IServiceCollection services,
-        ServiceRegistration registration)
+    private static ServiceRegistration GetConsulRegistration(this IServiceCollection services)
     {
         var serviceDescriptor = services.FirstOrDefault(sd => sd.ServiceType == typeof(ServiceRegistration));
-        services.Remove(serviceDescriptor);
-        services.AddSingleton(registration);
+
+        return serviceDescriptor.ImplementationInstance as ServiceRegistration;
     }
 
-    private static List<string> GetFabioTags(string consulService, string fabioService)
+    private static IList<string> GetFabioTags(string consulService, string fabioService)
     {
-        var service = (string.IsNullOrWhiteSpace(fabioService) ? consulService : fabioService)
-            .ToLowerInvariant();
+        var service = (string.IsNullOrWhiteSpace(fabioService) ? consulService : fabioService).ToLowerInvariant();
 
-        return new List<string> {$"urlprefix-/{service} strip=/{service}"};
+        return [$"urlprefix-/{service} strip=/{service}"];
     }
 }

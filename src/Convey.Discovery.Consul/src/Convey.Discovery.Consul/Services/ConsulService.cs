@@ -28,7 +28,7 @@ internal sealed class ConsulService : IConsulService
         => _httpClient.PutAsync(GetEndpoint($"agent/service/deregister/{id}"), EmptyRequest, cancellationToken);
 
     public Task<HttpResponseMessage> PassCheckAsync(string id, CancellationToken cancellationToken)
-        => _httpClient.PutAsync(GetEndpoint($"/agent/check/pass/{id}"), EmptyRequest, cancellationToken);
+        => _httpClient.PutAsync(GetEndpoint($"agent/check/pass/{id}"), EmptyRequest, cancellationToken);
 
     public async Task<IDictionary<string, ServiceAgent>> GetServiceAgentsAsync(string service = null, CancellationToken cancellationToken = default)
     {

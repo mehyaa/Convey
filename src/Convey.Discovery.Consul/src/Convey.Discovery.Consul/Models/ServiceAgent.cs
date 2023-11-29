@@ -8,7 +8,7 @@ public class ServiceAgent
     [JsonPropertyName("ID")]
     public string Id { get; set; }
     public string Service { get; set; }
-    public List<string> Tags { get; set; }
+    public IList<string> Tags { get; set; }
     public IDictionary<string, string> Meta { get; set; }
     public int Port { get; set; }
     public string Address { get; set; }
