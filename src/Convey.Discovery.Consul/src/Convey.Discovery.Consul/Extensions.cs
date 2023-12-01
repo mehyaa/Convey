@@ -129,7 +129,12 @@ public static class Extensions
         {
             Id = serviceId,
             Name = options.Service,
-            Address = options.UseAddress ? options.Address : GetHostIpAddress(),
+            Address =
+                options.UseAddress
+                    ? options.Address
+                    : IsInDocker()
+                        ? GetDockerContainerId()
+                        : GetHostIpAddress(),
             Port = options.Port,
             Tags = options.Tags,
             Meta = options.Meta,
@@ -196,6 +201,16 @@ public static class Extensions
         }
 
         return int.TryParse(value, out var number) ? $"{number}s" : value;
+    }
+
+    private static bool IsInDocker()
+    {
+        return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+    }
+
+    private static string GetDockerContainerId()
+    {
+        return Environment.MachineName;
     }
 
     private static string GetHostIpAddress()
