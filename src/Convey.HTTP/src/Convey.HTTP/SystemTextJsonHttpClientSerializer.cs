@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Convey.HTTP;
@@ -20,7 +21,9 @@ public class SystemTextJsonHttpClientSerializer : IHttpClientSerializer
         };
     }
 
-    public string Serialize<T>(T value) => JsonSerializer.Serialize(value, _options);
+    public string Serialize<T>(T value)
+        => JsonSerializer.Serialize(value, _options);
 
-    public ValueTask<T> DeserializeAsync<T>(Stream stream) => JsonSerializer.DeserializeAsync<T>(stream, _options);
+    public ValueTask<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
+        => JsonSerializer.DeserializeAsync<T>(stream, _options, cancellationToken);
 }
