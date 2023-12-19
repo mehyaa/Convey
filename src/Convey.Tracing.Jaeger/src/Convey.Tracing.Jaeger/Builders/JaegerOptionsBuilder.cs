@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Convey.Tracing.Jaeger.Builders;
 
 internal sealed class JaegerOptionsBuilder : IJaegerOptionsBuilder
@@ -10,45 +12,21 @@ internal sealed class JaegerOptionsBuilder : IJaegerOptionsBuilder
         return this;
     }
 
-    public IJaegerOptionsBuilder WithServiceName(string serviceName)
+    public IJaegerOptionsBuilder WithEndpoint(string endpoint)
     {
-        _options.ServiceName = serviceName;
+        _options.Endpoint = endpoint;
         return this;
     }
 
-    public IJaegerOptionsBuilder WithUdpHost(string udpHost)
+    public IJaegerOptionsBuilder WithProtocol(string protocol)
     {
-        _options.UdpHost = udpHost;
+        _options.Protocol = protocol;
         return this;
     }
 
-    public IJaegerOptionsBuilder WithUdpPort(int udpPort)
+    public IJaegerOptionsBuilder WithExcludePaths(IList<string> excludePaths)
     {
-        _options.UdpPort = udpPort;
-        return this;
-    }
-
-    public IJaegerOptionsBuilder WithMaxPacketSize(int maxPacketSize)
-    {
-        _options.MaxPacketSize = maxPacketSize;
-        return this;
-    }
-
-    public IJaegerOptionsBuilder WithSampler(string sampler)
-    {
-        _options.Sampler = sampler;
-        return this;
-    }
-
-    public IJaegerOptionsBuilder WithMaxTracesPerSecond(double maxTracesPerSecond)
-    {
-        _options.MaxTracesPerSecond = maxTracesPerSecond;
-        return this;
-    }
-
-    public IJaegerOptionsBuilder WithSamplingRate(double samplingRate)
-    {
-        _options.SamplingRate = samplingRate;
+        _options.ExcludePaths = excludePaths;
         return this;
     }
 

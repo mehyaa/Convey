@@ -4,14 +4,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Extensions.Docker.Resources;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 using OpenTracing;
 using OpenTracing.Util;
 using System;
-using System.Linq;
 using System.Threading;
 
 namespace Convey.Tracing.Jaeger;
@@ -61,36 +60,24 @@ public static class Extensions
                 .AddOpenTelemetry()
                 .WithTracing(builder =>
                     builder
-                        .ConfigureResource(resource => resource.AddDetector(new DockerResourceDetector()))
+                        .ConfigureResource(resource => resource.AddDetector(new ContainerResourceDetector()))
                         .AddAspNetCoreInstrumentation(string.Empty, aspCoreOptions =>
                         {
-                            aspCoreOptions.Filter = context =>
-                            {
-                                return options.ExcludePaths?.Contains(context.Request.Path.ToString()) != true;
-                            };
+                            aspCoreOptions.Filter =
+                                context =>
+                                    options.ExcludePaths?.Contains(context.Request.Path.ToString()) != true;
                         })
                     .AddHttpClientInstrumentation()
-                    .AddJaegerExporter(jaegerOptions =>
+                    .AddOtlpExporter("tracing", configure =>
                     {
-                        jaegerOptions.AgentHost = options?.UdpHost ?? "localhost";
-                        jaegerOptions.AgentPort = options?.UdpPort ?? 6831;
-
-                        var senderType = string.IsNullOrWhiteSpace(options.Sender) ? "udp" : options.Sender?.ToLowerInvariant();
-
-                        jaegerOptions.Protocol = senderType switch
+                        configure.Protocol = options.Protocol.ToLowerInvariant() switch
                         {
-                            "http" => JaegerExportProtocol.HttpBinaryThrift,
-                            "udp" => JaegerExportProtocol.UdpCompactThrift,
-                            _ => throw new InvalidOperationException($"Invalid Jaeger sender type: '{senderType}'.")
+                            "http" or "protobuf" or "httpprotobuf" or "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
+                            "grpc" => OtlpExportProtocol.Grpc,
+                            _ => OtlpExportProtocol.Grpc
                         };
 
-                        jaegerOptions.MaxPayloadSizeInBytes = options.MaxPacketSize <= 0 ? 4096 : options.MaxPacketSize;
-
-                        if (senderType == "http" && options.HttpSender is not null)
-                        {
-                            jaegerOptions.Endpoint = new Uri(options.HttpSender.Endpoint ?? "http://localhost:14268/api/traces");
-                            jaegerOptions.MaxPayloadSizeInBytes = options.HttpSender.MaxPacketSize <= 0 ? 4096 : options.HttpSender.MaxPacketSize;
-                        }
+                        configure.Endpoint = new(options.Endpoint ?? (configure.Protocol == OtlpExportProtocol.Grpc ? "localhost:4317" : "localhost:4318"));
                     })
                 );
 
