@@ -1,25 +1,13 @@
-using System.Linq;
-using System.Threading.Tasks;
 using MongoDB.Driver;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Convey.Persistence.MongoDB.Seeders;
 
 internal class MongoDbSeeder : IMongoDbSeeder
 {
-    public async Task SeedAsync(IMongoDatabase database)
+    public Task SeedAsync(IMongoDatabase database, CancellationToken cancellationToken)
     {
-        await CustomSeedAsync(database);
-    }
-
-    protected virtual async Task CustomSeedAsync(IMongoDatabase database)
-    {
-        var cursor = await database.ListCollectionsAsync();
-        var collections = await cursor.ToListAsync();
-        if (collections.Any())
-        {
-            return;
-        }
-
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }

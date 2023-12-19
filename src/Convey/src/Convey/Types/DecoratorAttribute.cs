@@ -2,7 +2,7 @@ using System;
 
 namespace Convey.Types;
 
-// Marker
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
 public class DecoratorAttribute : Attribute
 {
 }

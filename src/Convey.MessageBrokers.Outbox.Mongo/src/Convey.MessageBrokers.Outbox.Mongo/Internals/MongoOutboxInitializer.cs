@@ -1,8 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using Convey.MessageBrokers.Outbox.Messages;
 using Convey.Types;
 using MongoDB.Driver;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Convey.MessageBrokers.Outbox.Mongo.Internals;
 
@@ -17,7 +18,7 @@ internal sealed class MongoOutboxInitializer : IInitializer
         _options = options;
     }
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (!_options.Enabled)
         {
@@ -29,28 +30,36 @@ internal sealed class MongoOutboxInitializer : IInitializer
             return;
         }
 
-        var inboxCollection = string.IsNullOrWhiteSpace(_options.InboxCollection)
-            ? "inbox"
-            : _options.InboxCollection;
+        var inboxCollection =
+            string.IsNullOrWhiteSpace(_options.InboxCollection)
+                ? "inbox"
+                : _options.InboxCollection;
+
         var builder = Builders<InboxMessage>.IndexKeys;
+
         await _database.GetCollection<InboxMessage>(inboxCollection)
             .Indexes.CreateOneAsync(
                 new CreateIndexModel<InboxMessage>(builder.Ascending(i => i.ProcessedAt),
                     new CreateIndexOptions
                     {
                         ExpireAfter = TimeSpan.FromSeconds(_options.Expiry)
-                    }));
+                    }),
+                cancellationToken: cancellationToken);
 
-        var outboxCollection = string.IsNullOrWhiteSpace(_options.OutboxCollection)
-            ? "outbox"
-            : _options.OutboxCollection;
+        var outboxCollection =
+            string.IsNullOrWhiteSpace(_options.OutboxCollection)
+                ? "outbox"
+                : _options.OutboxCollection;
+
         var outboxBuilder = Builders<OutboxMessage>.IndexKeys;
+
         await _database.GetCollection<OutboxMessage>(outboxCollection)
             .Indexes.CreateOneAsync(
                 new CreateIndexModel<OutboxMessage>(outboxBuilder.Ascending(i => i.ProcessedAt),
                     new CreateIndexOptions
                     {
                         ExpireAfter = TimeSpan.FromSeconds(_options.Expiry)
-                    }));
+                    }),
+                cancellationToken: cancellationToken);
     }
 }

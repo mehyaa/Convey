@@ -1,28 +1,29 @@
+using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Convey.Types;
 
-public class StartupInitializer : IStartupInitializer
+public class StartupInitializer : IHostedService
 {
-    private readonly IList<IInitializer> _initializers = new List<IInitializer>();
+    private readonly IEnumerable<IInitializer> _initializers;
 
-    public void AddInitializer(IInitializer initializer)
+    public StartupInitializer(IEnumerable<IInitializer> initializers)
     {
-        if (initializer is null || _initializers.Contains(initializer))
-        {
-            return;
-        }
-
-        _initializers.Add(initializer);
-
+        _initializers = initializers;
     }
 
-    public async Task InitializeAsync()
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         foreach (var initializer in _initializers)
         {
-            await initializer.InitializeAsync();
+            await initializer.InitializeAsync(cancellationToken);
         }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

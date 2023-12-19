@@ -1,10 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Convey.Types;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
 
 namespace Convey;
 
@@ -12,7 +10,9 @@ public static class Extensions
 {
     private const string SectionName = "app";
 
-    public static IConveyBuilder AddConvey(this IServiceCollection services, string sectionName = SectionName,
+    public static IConveyBuilder AddConvey(
+        this IServiceCollection services,
+        string sectionName = SectionName,
         IConfiguration configuration = null)
     {
         if (string.IsNullOrWhiteSpace(sectionName))
@@ -21,28 +21,34 @@ public static class Extensions
         }
 
         var builder = ConveyBuilder.Create(services, configuration);
+
         var options = builder.GetOptions<AppOptions>(sectionName);
-        builder.Services.AddMemoryCache();
+
+        services.AddMemoryCache();
+
         services.AddSingleton(options);
         services.AddSingleton<IServiceId, ServiceId>();
+
+        services.AddHostedService<StartupInitializer>();
+
         if (!options.DisplayBanner || string.IsNullOrWhiteSpace(options.Name))
         {
             return builder;
         }
 
         var version = options.DisplayVersion ? $" {options.Version}" : string.Empty;
+
         Console.WriteLine(Figgle.FiggleFonts.Doom.Render($"{options.Name}{version}"));
 
         return builder;
     }
 
-    public static IApplicationBuilder UseConvey(this IApplicationBuilder app)
+    public static IConveyBuilder AddInitializer<TInitializer>(this IConveyBuilder builder)
+        where TInitializer : class, IInitializer
     {
-        using var scope = app.ApplicationServices.CreateScope();
-        var initializer = scope.ServiceProvider.GetRequiredService<IStartupInitializer>();
-        Task.Run(() => initializer.InitializeAsync()).GetAwaiter().GetResult();
+        builder.Services.AddTransient<IInitializer, TInitializer>();
 
-        return app;
+        return builder;
     }
 
     public static TModel GetOptions<TModel>(this IConfiguration configuration, string sectionName)
@@ -62,7 +68,9 @@ public static class Extensions
         }
 
         using var serviceProvider = builder.Services.BuildServiceProvider();
+
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
         return configuration.GetOptions<TModel>(settingsSectionName);
     }
 
