@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace Convey.WebApi.Helpers;
 
@@ -111,7 +111,7 @@ public static class Extensions
             return false;
         }
 
-        defaultValue = FormatterServices.GetUninitializedObject(type);
+        defaultValue = RuntimeHelpers.GetUninitializedObject(type);
 
         defaultValueCache[type] = defaultValue;
 
