@@ -1,28 +1,30 @@
-using System.Collections.Generic;
+using System;
 
 namespace Convey.MessageBrokers.RabbitMQ.Contexts;
 
 internal sealed class ContextProvider : IContextProvider
 {
     private readonly IRabbitMqSerializer _serializer;
+
     public string HeaderName { get; }
 
     public ContextProvider(IRabbitMqSerializer serializer, RabbitMqOptions options)
     {
         _serializer = serializer;
+
         HeaderName = string.IsNullOrWhiteSpace(options.Context?.Header)
             ? "message_context"
             : options.Context.Header;
     }
 
-    public object Get(IDictionary<string, object> headers)
+    public object Get(object message, Type messageType, MessageProperties messageProperties)
     {
-        if (headers is null)
+        if (messageProperties.Headers is null)
         {
             return null;
         }
-            
-        if (!headers.TryGetValue(HeaderName, out var context))
+
+        if (!messageProperties.Headers.TryGetValue(HeaderName, out var context))
         {
             return null;
         }

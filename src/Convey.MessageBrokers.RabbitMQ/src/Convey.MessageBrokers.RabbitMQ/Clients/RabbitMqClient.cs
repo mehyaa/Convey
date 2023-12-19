@@ -1,16 +1,17 @@
+using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
 
 namespace Convey.MessageBrokers.RabbitMQ.Clients;
 
 internal sealed class RabbitMqClient : IRabbitMqClient
 {
-    private readonly object _lockObject = new();
     private const string EmptyContext = "{}";
+
+    private readonly object _lockObject = new();
+
     private readonly IConnection _connection;
     private readonly IContextProvider _contextProvider;
     private readonly IRabbitMqSerializer _serializer;
@@ -19,12 +20,18 @@ internal sealed class RabbitMqClient : IRabbitMqClient
     private readonly bool _loggerEnabled;
     private readonly string _spanContextHeader;
     private readonly bool _persistMessages;
-    private int _channelsCount;
-    private readonly ConcurrentDictionary<int, IModel> _channels = new();
     private readonly int _maxChannels;
 
-    public RabbitMqClient(ProducerConnection connection, IContextProvider contextProvider, IRabbitMqSerializer serializer,
-        RabbitMqOptions options, ILogger<RabbitMqClient> logger)
+    private readonly ConcurrentDictionary<int, IModel> _channels = new();
+
+    private int _channelsCount;
+
+    public RabbitMqClient(
+        ProducerConnection connection,
+        IContextProvider contextProvider,
+        IRabbitMqSerializer serializer,
+        RabbitMqOptions options,
+        ILogger<RabbitMqClient> logger)
     {
         _connection = connection.Connection;
         _contextProvider = contextProvider;
@@ -37,27 +44,40 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         _maxChannels = options.MaxProducerChannels <= 0 ? 1000 : options.MaxProducerChannels;
     }
 
-    public void Send(object message, IConventions conventions, string messageId = null, string correlationId = null,
-        string spanContext = null, object messageContext = null, IDictionary<string, object> headers = null)
+    public void Send(
+        object message,
+        IConventions conventions,
+        string messageId = null,
+        string correlationId = null,
+        string spanContext = null,
+        object messageContext = null,
+        IDictionary<string, object> headers = null)
     {
-        var threadId = Thread.CurrentThread.ManagedThreadId;
+        var threadId = Environment.CurrentManagedThreadId;
+
         if (!_channels.TryGetValue(threadId, out var channel))
         {
             lock (_lockObject)
             {
                 if (_channelsCount >= _maxChannels)
                 {
-                    throw new InvalidOperationException($"Cannot create RabbitMQ producer channel for thread: {threadId} " +
-                                                        $"(reached the limit of {_maxChannels} channels). " +
-                                                        "Modify `MaxProducerChannels` setting to allow more channels.");
+                    throw new InvalidOperationException(
+                        $"Cannot create RabbitMQ producer channel for thread: {threadId} " +
+                        $"(reached the limit of {_maxChannels} channels). " +
+                        "Modify `MaxProducerChannels` setting to allow more channels.");
                 }
-                    
+
                 channel = _connection.CreateModel();
                 _channels.TryAdd(threadId, channel);
                 _channelsCount++;
+
                 if (_loggerEnabled)
                 {
-                    _logger.LogTrace($"Created a channel for thread: {threadId}, total channels: {_channelsCount}/{_maxChannels}");
+                    _logger.LogTrace(
+                        "Created a channel for thread: {ThreadId}, total channels: {ChannelsCount}/{MaxChannels}",
+                        threadId,
+                        _channelsCount,
+                        _maxChannels);
                 }
             }
         }
@@ -65,19 +85,19 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         {
             if (_loggerEnabled)
             {
-                _logger.LogTrace($"Reused a channel for thread: {threadId}, total channels: {_channelsCount}/{_maxChannels}");
+                _logger.LogTrace(
+                    "Reused a channel for thread: {ThreadId}, total channels: {ChannelsCount}/{MaxChannels}",
+                    threadId,
+                    _channelsCount,
+                    _maxChannels);
             }
         }
-            
-        var body = _serializer.Serialize(message);
+
         var properties = channel.CreateBasicProperties();
+
         properties.Persistent = _persistMessages;
-        properties.MessageId = string.IsNullOrWhiteSpace(messageId)
-            ? Guid.NewGuid().ToString("N")
-            : messageId;
-        properties.CorrelationId = string.IsNullOrWhiteSpace(correlationId)
-            ? Guid.NewGuid().ToString("N")
-            : correlationId;
+        properties.MessageId = string.IsNullOrWhiteSpace(messageId) ? Guid.NewGuid().ToString("N") : messageId;
+        properties.CorrelationId = string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString("N") : correlationId;
         properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         properties.Headers = new Dictionary<string, object>();
 
@@ -106,10 +126,15 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
         if (_loggerEnabled)
         {
-            _logger.LogTrace($"Publishing a message with routing key: '{conventions.RoutingKey}' " +
-                             $"to exchange: '{conventions.Exchange}' " +
-                             $"[id: '{properties.MessageId}', correlation id: '{properties.CorrelationId}']");
+            _logger.LogTrace(
+                "Publishing a message with routing key: '{RoutingKey}' to exchange: '{Exchange}' [id: '{MessageId}', correlation id: '{CorrelationId}']",
+                conventions.RoutingKey,
+                conventions.Exchange,
+                properties.MessageId,
+                properties.CorrelationId);
         }
+
+        var body = _serializer.Serialize(message);
 
         channel.BasicPublish(conventions.Exchange, conventions.RoutingKey, properties, body.ToArray());
     }
@@ -119,6 +144,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         if (context is not null)
         {
             properties.Headers.Add(_contextProvider.HeaderName, _serializer.Serialize(context).ToArray());
+
             return;
         }
 
