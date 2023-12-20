@@ -68,11 +68,11 @@ internal sealed class ConsulHostedService : IHostedService, IAsyncDisposable
                 {
                     if (!_cancellationTokenSource.IsCancellationRequested)
                     {
-                        _logger.LogDebug("Passing TTL check for service [id: {ServiceId}] to Consul...", _serviceRegistration.Id);
+                        _logger.LogTrace("Passing TTL check for service [id: {ServiceId}] to Consul...", _serviceRegistration.Id);
 
                         await _consulService.PassCheckAsync(_serviceRegistration.Id, _cancellationTokenSource.Token);
 
-                        _logger.LogDebug("TTL check for service [id: {ServiceId}] passed to Consul", _serviceRegistration.Id);
+                        _logger.LogTrace("TTL check for service [id: {ServiceId}] passed to Consul", _serviceRegistration.Id);
                     }
                 }
                 catch (Exception ex)
