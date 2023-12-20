@@ -220,5 +220,5 @@ public static class Extensions
     }
 
     public static IBusSubscriber UseRabbitMq(this IApplicationBuilder app)
-        => new RabbitMqSubscriber(app.ApplicationServices.GetRequiredService<MessageSubscribersChannel>());
+        => app.ApplicationServices.GetRequiredService<IBusSubscriber>();
 }

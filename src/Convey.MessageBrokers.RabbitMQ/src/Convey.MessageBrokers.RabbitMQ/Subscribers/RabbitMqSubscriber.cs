@@ -16,8 +16,13 @@ internal sealed class RabbitMqSubscriber : IBusSubscriber
         where T : class
     {
         var type = typeof(T);
-        _messageSubscribersChannel.Writer.TryWrite(MessageSubscriber.Subscribe(type,
-            (serviceProvider, message, context) => handle(serviceProvider, (T) message, context)));
+
+        _messageSubscribersChannel.Writer.TryWrite(
+            MessageSubscriber.Subscribe(
+                type,
+                (serviceProvider, message, context) =>
+                    handle(serviceProvider, (T) message, context)));
+
         return this;
     }
 
