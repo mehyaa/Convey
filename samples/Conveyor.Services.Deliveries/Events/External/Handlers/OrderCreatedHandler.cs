@@ -48,7 +48,10 @@ public class OrderCreatedHandler : IEventHandler<OrderCreated>
             spanContext = Activity.Current?.Context is null ? string.Empty : Activity.Current?.Context.ToString();
         }
 
-        return _publisher.PublishAsync(new DeliveryStarted(deliveryId), correlationId: correlationId,
-            spanContext: spanContext);
+        return _publisher.PublishAsync(
+            new DeliveryStarted(deliveryId),
+            correlationId: correlationId,
+            spanContext: spanContext,
+            cancellationToken: cancellationToken);
     }
 }

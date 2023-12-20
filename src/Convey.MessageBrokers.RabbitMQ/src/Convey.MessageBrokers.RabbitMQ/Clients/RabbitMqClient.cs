@@ -46,7 +46,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
     public void Send(
         object message,
-        IConventions conventions,
+        IConvention convention,
         string messageId = null,
         string correlationId = null,
         string spanContext = null,
@@ -128,15 +128,15 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         {
             _logger.LogTrace(
                 "Publishing a message with routing key: '{RoutingKey}' to exchange: '{Exchange}' [id: '{MessageId}', correlation id: '{CorrelationId}']",
-                conventions.RoutingKey,
-                conventions.Exchange,
+                convention.RoutingKey,
+                convention.Exchange,
                 properties.MessageId,
                 properties.CorrelationId);
         }
 
         var body = _serializer.Serialize(message);
 
-        channel.BasicPublish(conventions.Exchange, conventions.RoutingKey, properties, body.ToArray());
+        channel.BasicPublish(convention.Exchange, convention.RoutingKey, properties, body.ToArray());
     }
 
     private void IncludeMessageContext(object context, IBasicProperties properties)

@@ -2,7 +2,7 @@ using System;
 
 namespace Convey.MessageBrokers;
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public class MessageAttribute : Attribute
 {
     public string Exchange { get; }
@@ -10,7 +10,10 @@ public class MessageAttribute : Attribute
     public string Queue { get; }
     public bool External { get; }
 
-    public MessageAttribute(string exchange = null, string routingKey = null, string queue = null,
+    public MessageAttribute(
+        string exchange = null,
+        string routingKey = null,
+        string queue = null,
         bool external = false)
     {
         Exchange = exchange;

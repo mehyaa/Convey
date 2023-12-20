@@ -2,7 +2,7 @@ using System;
 
 namespace Convey.MessageBrokers.RabbitMQ;
 
-public interface IConventions
+public interface IConvention
 {
     Type Type { get; }
     string RoutingKey { get; }

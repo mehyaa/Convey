@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Convey.CQRS.Commands;
 using Convey.CQRS.Events;
@@ -8,13 +9,21 @@ namespace Convey.MessageBrokers.CQRS;
 
 public static class Extensions
 {
-    public static Task SendAsync<TCommand>(this IBusPublisher busPublisher, TCommand command, object messageContext)
+    public static Task SendAsync<TCommand>(
+        this IBusPublisher busPublisher,
+        TCommand command,
+        object messageContext,
+        CancellationToken cancellationToken = default)
         where TCommand : class, ICommand
-        => busPublisher.PublishAsync(command, messageContext: messageContext);
+        => busPublisher.PublishAsync(command, messageContext: messageContext, cancellationToken: cancellationToken);
 
-    public static Task PublishAsync<TEvent>(this IBusPublisher busPublisher, TEvent @event, object messageContext)
+    public static Task PublishAsync<TEvent>(
+        this IBusPublisher busPublisher,
+        TEvent @event,
+        object messageContext,
+        CancellationToken cancellationToken = default)
         where TEvent : class, IEvent
-        => busPublisher.PublishAsync(@event, messageContext: messageContext);
+        => busPublisher.PublishAsync(@event, messageContext: messageContext, cancellationToken: cancellationToken);
 
     public static IBusSubscriber SubscribeCommand<T>(this IBusSubscriber busSubscriber) where T : class, ICommand
         => busSubscriber.Subscribe<T>(

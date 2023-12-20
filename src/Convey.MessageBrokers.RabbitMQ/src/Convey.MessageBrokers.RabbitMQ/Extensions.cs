@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 using Convey.MessageBrokers.RabbitMQ.Clients;
 using Convey.MessageBrokers.RabbitMQ.Contexts;
 using Convey.MessageBrokers.RabbitMQ.Conventions;
@@ -15,6 +11,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using System;
+using System.Linq;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Convey.MessageBrokers.RabbitMQ;
 
@@ -23,9 +23,12 @@ public static class Extensions
     private const string SectionName = "rabbitmq";
     private const string RegistryName = "messageBrokers.rabbitmq";
 
-    public static IConveyBuilder AddRabbitMq(this IConveyBuilder builder, string sectionName = SectionName,
+    public static IConveyBuilder AddRabbitMq(
+        this IConveyBuilder builder,
+        string sectionName = SectionName,
         Func<IRabbitMqPluginsRegistry, IRabbitMqPluginsRegistry> plugins = null,
-        Action<ConnectionFactory> connectionFactoryConfigurator = null, IRabbitMqSerializer serializer = null)
+        Action<ConnectionFactory> connectionFactoryConfigurator = null,
+        IRabbitMqSerializer serializer = null)
     {
         if (string.IsNullOrWhiteSpace(sectionName))
         {
@@ -33,7 +36,9 @@ public static class Extensions
         }
 
         var options = builder.GetOptions<RabbitMqOptions>(sectionName);
+
         builder.Services.AddSingleton(options);
+
         if (!builder.TryRegister(RegistryName))
         {
             return builder;
@@ -44,8 +49,8 @@ public static class Extensions
             throw new ArgumentException("RabbitMQ hostnames are not specified.", nameof(options.HostNames));
         }
 
-
         ILogger<IRabbitMqClient> logger;
+
         using (var serviceProvider = builder.Services.BuildServiceProvider())
         {
             logger = serviceProvider.GetRequiredService<ILogger<IRabbitMqClient>>();
@@ -54,15 +59,17 @@ public static class Extensions
         builder.Services.AddSingleton<IContextProvider, ContextProvider>();
         builder.Services.AddSingleton<ICorrelationContextAccessor>(new CorrelationContextAccessor());
         builder.Services.AddSingleton<IMessagePropertiesAccessor>(new MessagePropertiesAccessor());
-        builder.Services.AddSingleton<IConventionsBuilder, ConventionsBuilder>();
-        builder.Services.AddSingleton<IConventionsProvider, ConventionsProvider>();
-        builder.Services.AddSingleton<IConventionsRegistry, ConventionsRegistry>();
+        builder.Services.AddSingleton<IConventionBuilder, ConventionBuilder>();
+        builder.Services.AddSingleton<IConventioProvider, ConventionProvider>();
+        builder.Services.AddSingleton<IConventionRegistry, ConventionRegistry>();
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         builder.Services.AddSingleton<IBusPublisher, RabbitMqPublisher>();
         builder.Services.AddSingleton<IBusSubscriber, RabbitMqSubscriber>();
         builder.Services.AddSingleton<MessageSubscribersChannel>();
         builder.Services.AddTransient<RabbitMqExchangeInitializer>();
+
         builder.Services.AddHostedService<RabbitMqBackgroundService>();
+
         builder.AddInitializer<RabbitMqExchangeInitializer>();
 
         if (serializer is not null)
@@ -74,9 +81,12 @@ public static class Extensions
             builder.Services.AddSingleton<IRabbitMqSerializer, SystemTextJsonJsonRabbitMqSerializer>();
         }
 
-        var pluginsRegistry = new RabbitMqPluginsRegistry();
-        builder.Services.AddSingleton<IRabbitMqPluginsRegistryAccessor>(pluginsRegistry);
         builder.Services.AddSingleton<IRabbitMqPluginsExecutor, RabbitMqPluginsExecutor>();
+
+        var pluginsRegistry = new RabbitMqPluginsRegistry();
+
+        builder.Services.AddSingleton<IRabbitMqPluginsRegistryAccessor>(pluginsRegistry);
+
         plugins?.Invoke(pluginsRegistry);
 
         var connectionFactory = new ConnectionFactory
@@ -99,23 +109,27 @@ public static class Extensions
                 ? new SslOption()
                 : new SslOption(options.Ssl.ServerName, options.Ssl.CertificatePath, options.Ssl.Enabled)
         };
+
         ConfigureSsl(connectionFactory, options, logger);
         connectionFactoryConfigurator?.Invoke(connectionFactory);
 
-        logger.LogDebug($"Connecting to RabbitMQ: '{string.Join(", ", options.HostNames)}'...");
+        logger.LogDebug("Connecting to RabbitMQ: '{Hostnames}'...", string.Join(", ", options.HostNames));
         var consumerConnection = connectionFactory.CreateConnection(options.HostNames.ToList(), $"{options.ConnectionName}_consumer");
         var producerConnection = connectionFactory.CreateConnection(options.HostNames.ToList(), $"{options.ConnectionName}_producer");
-        logger.LogDebug($"Connected to RabbitMQ: '{string.Join(", ", options.HostNames)}'.");
+        logger.LogDebug("Connected to RabbitMQ: '{Hostnames}'", string.Join(", ", options.HostNames));
+
         builder.Services.AddSingleton(new ConsumerConnection(consumerConnection));
         builder.Services.AddSingleton(new ProducerConnection(producerConnection));
 
-        ((IRabbitMqPluginsRegistryAccessor) pluginsRegistry).Get().ToList().ForEach(p =>
+        ((IRabbitMqPluginsRegistryAccessor)pluginsRegistry).Get().ToList().ForEach(p =>
             builder.Services.AddTransient(p.PluginType));
 
         return builder;
     }
 
-    private static void ConfigureSsl(ConnectionFactory connectionFactory, RabbitMqOptions options,
+    private static void ConfigureSsl(
+        ConnectionFactory connectionFactory,
+        RabbitMqOptions options,
         ILogger<IRabbitMqClient> logger)
     {
         if (options.Ssl is null || string.IsNullOrWhiteSpace(options.Ssl.ServerName))
@@ -127,16 +141,19 @@ public static class Extensions
         connectionFactory.Ssl = new SslOption(options.Ssl.ServerName, options.Ssl.CertificatePath,
             options.Ssl.Enabled);
 
-        logger.LogDebug($"RabbitMQ SSL is: {(options.Ssl.Enabled ? "enabled" : "disabled")}, " +
-                        $"server: '{options.Ssl.ServerName}', client certificate: '{options.Ssl.CertificatePath}', " +
-                        $"CA certificate: '{options.Ssl.CaCertificatePath}'.");
+        logger.LogDebug(
+            "RabbitMQ SSL is: {SslEnabled}, server: '{ServerName}', client certificate: '{CertificatePath}', CA certificate: '{CaCertificatePath}'",
+            options.Ssl.Enabled,
+            options.Ssl.ServerName,
+            options.Ssl.CertificatePath,
+            options.Ssl.CaCertificatePath);
 
         if (string.IsNullOrWhiteSpace(options.Ssl.CaCertificatePath))
         {
             return;
         }
 
-        connectionFactory.Ssl.CertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+        connectionFactory.Ssl.CertificateValidationCallback = (_, certificate, chain, sslPolicyErrors) =>
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
@@ -149,29 +166,39 @@ public static class Extensions
             }
 
             chain = new X509Chain();
-            var certificate2 = new X509Certificate2(certificate);
+
             var signerCertificate2 = new X509Certificate2(options.Ssl.CaCertificatePath);
             chain.ChainPolicy.ExtraStore.Add(signerCertificate2);
+
+            var certificate2 = new X509Certificate2(certificate);
             chain.Build(certificate2);
+
             var ignoredStatuses = Enumerable.Empty<X509ChainStatusFlags>();
+
             if (options.Ssl.X509IgnoredStatuses?.Any() is true)
             {
-                logger.LogDebug("Ignored X509 certificate chain statuses: " +
-                                $"{string.Join(", ", options.Ssl.X509IgnoredStatuses)}.");
-                ignoredStatuses = options.Ssl.X509IgnoredStatuses
-                    .Select(s => Enum.Parse<X509ChainStatusFlags>(s, true));
+                logger.LogDebug(
+                    "Ignored X509 certificate chain statuses: {X509IgnoredStatuses}",
+                    string.Join(", ", options.Ssl.X509IgnoredStatuses));
+
+                ignoredStatuses = options.Ssl.X509IgnoredStatuses.Select(s => Enum.Parse<X509ChainStatusFlags>(s, true));
             }
 
-            var statuses = chain.ChainStatus.ToList();
-            logger.LogDebug("Received X509 certificate chain statuses: " +
-                            $"{string.Join(", ", statuses.Select(x => x.Status))}");
+            var statuses = chain.ChainStatus;
 
-            var isValid = statuses.All(chainStatus => chainStatus.Status == X509ChainStatusFlags.NoError
-                                                      || ignoredStatuses.Contains(chainStatus.Status));
+            logger.LogDebug(
+                "Received X509 certificate chain statuses: {Statuses}",
+                string.Join(", ", statuses.Select(x => x.Status)));
+
+            var isValid = statuses.All(s => s.Status == X509ChainStatusFlags.NoError || ignoredStatuses.Contains(s.Status));
+
             if (!isValid)
             {
-                logger.LogError(string.Join(Environment.NewLine,
-                    statuses.Select(s => $"{s.Status} - {s.StatusInformation}")));
+                logger.LogError(
+                    "All received X509 certificate chain statuses are not valid: \n{Information}",
+                    string.Join(
+                        Environment.NewLine,
+                        statuses.Select(s => $"{s.Status} - {s.StatusInformation}")));
             }
 
             return isValid;

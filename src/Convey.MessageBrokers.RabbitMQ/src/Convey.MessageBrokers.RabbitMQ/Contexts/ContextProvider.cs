@@ -12,9 +12,10 @@ internal sealed class ContextProvider : IContextProvider
     {
         _serializer = serializer;
 
-        HeaderName = string.IsNullOrWhiteSpace(options.Context?.Header)
-            ? "message_context"
-            : options.Context.Header;
+        HeaderName =
+            string.IsNullOrWhiteSpace(options.Context?.Header)
+                ? "message_context"
+                : options.Context.Header;
     }
 
     public object Get(object message, Type messageType, MessageProperties messageProperties)

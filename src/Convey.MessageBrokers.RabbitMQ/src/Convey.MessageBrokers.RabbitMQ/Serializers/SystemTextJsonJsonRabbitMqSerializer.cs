@@ -15,10 +15,10 @@ public sealed class SystemTextJsonJsonRabbitMqSerializer : IRabbitMqSerializer
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)}
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
     }
-        
+
     public ReadOnlySpan<byte> Serialize(object value) => JsonSerializer.SerializeToUtf8Bytes(value, _options);
 
     public object Deserialize(ReadOnlySpan<byte> value, Type type) => JsonSerializer.Deserialize(value, type, _options);

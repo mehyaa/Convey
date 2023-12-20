@@ -39,7 +39,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
     private readonly MessageSubscribersChannel _messageSubscribersChannel;
     private readonly IBusPublisher _publisher;
     private readonly IRabbitMqSerializer _rabbitMqSerializer;
-    private readonly IConventionsProvider _conventionsProvider;
+    private readonly IConventioProvider _conventionsProvider;
     private readonly IContextProvider _contextProvider;
     private readonly IRabbitMqPluginsExecutor _pluginsExecutor;
     private readonly IExceptionToMessageMapper _exceptionToMessageMapper;
@@ -63,7 +63,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
         _messageSubscribersChannel = serviceProvider.GetRequiredService<MessageSubscribersChannel>();
         _publisher = _serviceProvider.GetRequiredService<IBusPublisher>();
         _rabbitMqSerializer = _serviceProvider.GetRequiredService<IRabbitMqSerializer>();
-        _conventionsProvider = _serviceProvider.GetRequiredService<IConventionsProvider>();
+        _conventionsProvider = _serviceProvider.GetRequiredService<IConventioProvider>();
         _contextProvider = _serviceProvider.GetRequiredService<IContextProvider>();
         _pluginsExecutor = _serviceProvider.GetRequiredService<IRabbitMqPluginsExecutor>();
         _exceptionToMessageMapper = _serviceProvider.GetService<IExceptionToMessageMapper>() ?? ExceptionToMessageMapper;
@@ -119,17 +119,17 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
                         throw new InvalidOperationException("Unknown message subscriber action type.");
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                _logger.LogError(exception, "There was an error during RabbitMQ action: '{Action}'", messageSubscriber.Action);
+                _logger.LogError(ex, "There was an error during RabbitMQ action: '{Action}'", messageSubscriber.Action);
             }
         }
     }
 
     private void Subscribe(IMessageSubscriber messageSubscriber)
     {
-        var conventions = _conventionsProvider.Get(messageSubscriber.Type);
-        var channelKey = GetChannelKey(conventions);
+        var convention = _conventionsProvider.Get(messageSubscriber.Type);
+        var channelKey = GetChannelKey(convention);
 
         if (_channels.ContainsKey(channelKey))
         {
@@ -142,9 +142,9 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
         {
             _logger.LogError(
                 "Couldn't add the channel for exchange: '{Exchange}', queue: '{Queue}', routing key: '{RoutingKey}'",
-                conventions.Exchange,
-                conventions.Queue,
-                conventions.RoutingKey);
+                convention.Exchange,
+                convention.Queue,
+                convention.RoutingKey);
 
             channel.Dispose();
 
@@ -154,9 +154,9 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
         _logger.LogTrace(
             "Added the channel: {ChannelNumber} for exchange: '{Exchange}', queue: '{Queue}', routing key: '{RoutingKey}'",
             channel.ChannelNumber,
-            conventions.Exchange,
-            conventions.Queue,
-            conventions.RoutingKey);
+            convention.Exchange,
+            convention.Queue,
+            convention.RoutingKey);
 
         var declare = _options.Queue?.Declare ?? true;
         var durable = _options.Queue?.Durable ?? true;
@@ -172,7 +172,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
 
         var deadLetterQueue =
             deadLetterEnabled
-                ? $"{_options.DeadLetter.Prefix}{conventions.Queue}{_options.DeadLetter.Suffix}"
+                ? $"{_options.DeadLetter.Prefix}{convention.Queue}{_options.DeadLetter.Suffix}"
                 : string.Empty;
 
         if (declare)
@@ -181,9 +181,9 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
             {
                 _logger.LogInformation(
                     "Declaring a queue: '{Queue}' with routing key: '{RoutingKey}' for an exchange: '{Exchange}'",
-                    conventions.Exchange,
-                    conventions.Queue,
-                    conventions.RoutingKey);
+                    convention.Exchange,
+                    convention.Queue,
+                    convention.RoutingKey);
             }
 
             var queueArguments =
@@ -195,10 +195,10 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
                     }
                     : [];
 
-            channel.QueueDeclare(conventions.Queue, durable, exclusive, autoDelete, queueArguments);
+            channel.QueueDeclare(convention.Queue, durable, exclusive, autoDelete, queueArguments);
         }
 
-        channel.QueueBind(conventions.Queue, conventions.Exchange, conventions.RoutingKey);
+        channel.QueueBind(convention.Queue, convention.Exchange, convention.RoutingKey);
         channel.BasicQos(_qosOptions.PrefetchSize, _qosOptions.PrefetchCount, _qosOptions.Global);
 
         if (_options.DeadLetter?.Enabled is true)
@@ -213,8 +213,8 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
                 var deadLetterArgs =
                     new Dictionary<string, object>
                     {
-                        { "x-dead-letter-exchange", conventions.Exchange },
-                        { "x-dead-letter-routing-key", conventions.Queue }
+                        { "x-dead-letter-exchange", convention.Exchange },
+                        { "x-dead-letter-routing-key", convention.Queue }
                     };
 
                 if (ttl.HasValue)
@@ -265,9 +265,9 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
                         messageId,
                         correlationId,
                         timestamp,
-                        conventions.Queue,
-                        conventions.RoutingKey,
-                        conventions.Exchange,
+                        convention.Queue,
+                        convention.RoutingKey,
+                        convention.Exchange,
                         messagePayload);
                 }
 
@@ -286,7 +286,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
             }
         };
 
-        channel.BasicConsume(conventions.Queue, false, consumer);
+        channel.BasicConsume(convention.Queue, false, consumer);
     }
 
     private object BuildCorrelationContext(IServiceProvider serviceProvider, BasicDeliverEventArgs args, object message, Type messageType)
@@ -480,8 +480,8 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
     private void Unsubscribe(IMessageSubscriber messageSubscriber)
     {
         var type = messageSubscriber.Type;
-        var conventions = _conventionsProvider.Get(type);
-        var channelKey = GetChannelKey(conventions);
+        var convention = _conventionsProvider.Get(type);
+        var channelKey = GetChannelKey(convention);
 
         if (!_channels.TryRemove(channelKey, out var channel))
         {
@@ -493,13 +493,13 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
         _logger.LogTrace(
             "Removed channel: {ChannelNumber}, exchange: '{Exchange}', queue: '{Queue}', routing key: '{RoutingKey}'",
             channel.ChannelNumber,
-            conventions.Exchange,
-            conventions.Queue,
-            conventions.RoutingKey);
+            convention.Exchange,
+            convention.Queue,
+            convention.RoutingKey);
     }
 
-    private static string GetChannelKey(IConventions conventions)
-        => $"{conventions.Exchange}:{conventions.RoutingKey}:{conventions.Queue}";
+    private static string GetChannelKey(IConvention convention)
+        => $"{convention.Exchange}:{convention.RoutingKey}:{convention.Queue}";
 
     public override void Dispose()
     {
@@ -547,32 +547,37 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
 
     private void ConnectionOnCallbackException(object sender, CallbackExceptionEventArgs eventArgs)
     {
-        _logger.LogError("RabbitMQ callback exception occured.");
+        var details =
+            eventArgs.Detail is not null
+                ? JsonSerializer.Serialize(eventArgs.Detail, SerializerOptions)
+                : string.Empty;
 
         if (eventArgs.Exception is not null)
         {
-            _logger.LogError(eventArgs.Exception, eventArgs.Exception.Message);
+            _logger.LogError(eventArgs.Exception, "RabbitMQ callback exception occured, details: {Details}", details);
         }
-
-        if (eventArgs.Detail is not null)
+        else
         {
-            _logger.LogError(JsonSerializer.Serialize(eventArgs.Detail, SerializerOptions));
+            _logger.LogError("RabbitMQ callback exception occured, details: {Details}", details);
         }
     }
 
     private void ConnectionOnConnectionShutdown(object sender, ShutdownEventArgs eventArgs)
     {
-        _logger.LogError($"RabbitMQ connection shutdown occured. Initiator: '{eventArgs.Initiator}', " +
-                         $"reply code: '{eventArgs.ReplyCode}', text: '{eventArgs.ReplyText}'.");
+        _logger.LogError(
+            "RabbitMQ connection shutdown occured. Initiator: '{Initiator}', reply code: '{ReplyCode}', text: '{ReplyText}'",
+            eventArgs.Initiator,
+            eventArgs.ReplyCode,
+            eventArgs.ReplyText);
     }
 
     private void ConnectionOnConnectionBlocked(object sender, ConnectionBlockedEventArgs eventArgs)
     {
-        _logger.LogError($"RabbitMQ connection has been blocked. {eventArgs.Reason}");
+        _logger.LogError("RabbitMQ connection has been blocked: {Reason}", eventArgs.Reason);
     }
 
     private void ConnectionOnConnectionUnblocked(object sender, EventArgs eventArgs)
     {
-        _logger.LogInformation("RabbitMQ connection has been unblocked.");
+        _logger.LogInformation("RabbitMQ connection has been unblocked");
     }
 }

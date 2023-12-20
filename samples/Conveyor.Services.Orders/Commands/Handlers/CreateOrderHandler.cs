@@ -59,6 +59,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrder>
             return;
         }
 
-        await _publisher.PublishAsync(@event, spanContext: spanContext);
+        await _publisher.PublishAsync(@event, spanContext: spanContext, cancellationToken: cancellationToken);
     }
 }
