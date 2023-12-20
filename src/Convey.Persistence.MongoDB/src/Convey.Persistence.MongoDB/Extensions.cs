@@ -1,4 +1,3 @@
-using System;
 using Convey.Persistence.MongoDB.Builders;
 using Convey.Persistence.MongoDB.Factories;
 using Convey.Persistence.MongoDB.Initializers;
@@ -11,6 +10,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using System;
 
 namespace Convey.Persistence.MongoDB;
 
@@ -18,11 +18,15 @@ public static class Extensions
 {
     // Helpful when dealing with integration testing
     private static bool _conventionsRegistered;
+
     private const string SectionName = "mongo";
     private const string RegistryName = "persistence.mongoDb";
 
-    public static IConveyBuilder AddMongo(this IConveyBuilder builder, string sectionName = SectionName,
-        Type seederType = null, bool registerConventions = true)
+    public static IConveyBuilder AddMongo(
+        this IConveyBuilder builder,
+        string sectionName = SectionName,
+        Type seederType = null,
+        bool registerConventions = true)
     {
         if (string.IsNullOrWhiteSpace(sectionName))
         {
@@ -30,18 +34,26 @@ public static class Extensions
         }
 
         var mongoOptions = builder.GetOptions<MongoDbOptions>(sectionName);
+
         return builder.AddMongo(mongoOptions, seederType, registerConventions);
     }
 
-    public static IConveyBuilder AddMongo(this IConveyBuilder builder, Func<IMongoDbOptionsBuilder,
-        IMongoDbOptionsBuilder> buildOptions, Type seederType = null, bool registerConventions = true)
+    public static IConveyBuilder AddMongo(
+        this IConveyBuilder builder,
+        Func<IMongoDbOptionsBuilder, IMongoDbOptionsBuilder> buildOptions,
+        Type seederType = null,
+        bool registerConventions = true)
     {
-        var mongoOptions = buildOptions(new MongoDbOptionsBuilder()).Build();
+        var mongoOptions = buildOptions.Invoke(new MongoDbOptionsBuilder()).Build();
+
         return builder.AddMongo(mongoOptions, seederType, registerConventions);
     }
 
-    public static IConveyBuilder AddMongo(this IConveyBuilder builder, MongoDbOptions mongoOptions,
-        Type seederType = null, bool registerConventions = true)
+    public static IConveyBuilder AddMongo(
+        this IConveyBuilder builder,
+        MongoDbOptions mongoOptions,
+        Type seederType = null,
+        bool registerConventions = true)
     {
         if (!builder.TryRegister(RegistryName))
         {
@@ -51,22 +63,19 @@ public static class Extensions
         if (mongoOptions.SetRandomDatabaseSuffix)
         {
             var suffix = $"{Guid.NewGuid():N}";
-            Console.WriteLine($"Setting a random MongoDB database suffix: '{suffix}'.");
+
+            Console.WriteLine($"Setting a random MongoDB database suffix: '{suffix}'");
+
             mongoOptions.Database = $"{mongoOptions.Database}_{suffix}";
         }
 
         builder.Services.AddSingleton(mongoOptions);
-        builder.Services.AddSingleton<IMongoClient>(sp =>
-        {
-            var options = sp.GetRequiredService<MongoDbOptions>();
-            return new MongoClient(options.ConnectionString);
-        });
+
+        builder.Services.AddSingleton<IMongoClient>(new MongoClient(mongoOptions.ConnectionString));
+
         builder.Services.AddTransient(sp =>
-        {
-            var options = sp.GetRequiredService<MongoDbOptions>();
-            var client = sp.GetRequiredService<IMongoClient>();
-            return client.GetDatabase(options.Database);
-        });
+            sp.GetRequiredService<IMongoClient>().GetDatabase(mongoOptions.Database));
+
         builder.Services.AddTransient<IMongoDbInitializer, MongoDbInitializer>();
         builder.Services.AddTransient<IMongoSessionFactory, MongoSessionFactory>();
 
@@ -79,7 +88,8 @@ public static class Extensions
             builder.Services.AddTransient(typeof(IMongoDbSeeder), seederType);
         }
 
-        builder.AddInitializer<IMongoDbInitializer>();
+        builder.AddInitializer<MongoDbInitializer>();
+
         if (registerConventions && !_conventionsRegistered)
         {
             RegisterConventions();
@@ -91,26 +101,30 @@ public static class Extensions
     private static void RegisterConventions()
     {
         _conventionsRegistered = true;
-        BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
-        BsonSerializer.RegisterSerializer(typeof(decimal?),
-            new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));
-        ConventionRegistry.Register("convey", new ConventionPack
-        {
-            new CamelCaseElementNameConvention(),
-            new IgnoreExtraElementsConvention(true),
-            new EnumRepresentationConvention(BsonType.String),
-        }, _ => true);
+
+        var decimalSerializer = new DecimalSerializer(BsonType.Decimal128);
+
+        BsonSerializer.RegisterSerializer(new DecimalSerializer(BsonType.Decimal128));
+        BsonSerializer.RegisterSerializer(new NullableSerializer<decimal>(decimalSerializer));
+
+        ConventionRegistry.Register(
+            "convey",
+            new ConventionPack
+            {
+                new CamelCaseElementNameConvention(),
+                new IgnoreExtraElementsConvention(true),
+                new EnumRepresentationConvention(BsonType.String),
+            },
+            _ => true);
     }
 
-    public static IConveyBuilder AddMongoRepository<TEntity, TIdentifiable>(this IConveyBuilder builder,
+    public static IConveyBuilder AddMongoRepository<TEntity, TIdentifiable>(
+        this IConveyBuilder builder,
         string collectionName)
         where TEntity : IIdentifiable<TIdentifiable>
     {
         builder.Services.AddTransient<IMongoRepository<TEntity, TIdentifiable>>(sp =>
-        {
-            var database = sp.GetRequiredService<IMongoDatabase>();
-            return new MongoRepository<TEntity, TIdentifiable>(database, collectionName);
-        });
+            new MongoRepository<TEntity, TIdentifiable>(sp.GetRequiredService<IMongoDatabase>(), collectionName));
 
         return builder;
     }
