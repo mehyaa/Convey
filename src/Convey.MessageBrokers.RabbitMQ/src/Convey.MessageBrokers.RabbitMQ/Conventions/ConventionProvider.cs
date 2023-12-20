@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace Convey.MessageBrokers.RabbitMQ.Conventions;
 
-public class ConventionProvider : IConventioProvider
+public class ConventionProvider : IConventionProvider
 {
     private readonly ConcurrentDictionary<Type, IConvention> _conventions = new();
 

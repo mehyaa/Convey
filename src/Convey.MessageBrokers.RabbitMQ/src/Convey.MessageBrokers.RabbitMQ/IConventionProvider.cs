@@ -2,7 +2,7 @@ using System;
 
 namespace Convey.MessageBrokers.RabbitMQ;
 
-public interface IConventioProvider
+public interface IConventionProvider
 {
     IConvention Get<T>();
     IConvention Get(Type type);

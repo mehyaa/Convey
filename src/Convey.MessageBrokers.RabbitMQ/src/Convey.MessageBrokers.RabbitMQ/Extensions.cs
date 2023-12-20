@@ -60,7 +60,7 @@ public static class Extensions
         builder.Services.AddSingleton<ICorrelationContextAccessor>(new CorrelationContextAccessor());
         builder.Services.AddSingleton<IMessagePropertiesAccessor>(new MessagePropertiesAccessor());
         builder.Services.AddSingleton<IConventionBuilder, ConventionBuilder>();
-        builder.Services.AddSingleton<IConventioProvider, ConventionProvider>();
+        builder.Services.AddSingleton<IConventionProvider, ConventionProvider>();
         builder.Services.AddSingleton<IConventionRegistry, ConventionRegistry>();
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         builder.Services.AddSingleton<IBusPublisher, RabbitMqPublisher>();

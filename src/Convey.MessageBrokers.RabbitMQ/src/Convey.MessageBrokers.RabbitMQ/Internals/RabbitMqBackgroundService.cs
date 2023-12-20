@@ -39,7 +39,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
     private readonly MessageSubscribersChannel _messageSubscribersChannel;
     private readonly IBusPublisher _publisher;
     private readonly IRabbitMqSerializer _rabbitMqSerializer;
-    private readonly IConventioProvider _conventionsProvider;
+    private readonly IConventionProvider _conventionsProvider;
     private readonly IContextProvider _contextProvider;
     private readonly IRabbitMqPluginsExecutor _pluginsExecutor;
     private readonly IExceptionToMessageMapper _exceptionToMessageMapper;
@@ -63,7 +63,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
         _messageSubscribersChannel = serviceProvider.GetRequiredService<MessageSubscribersChannel>();
         _publisher = _serviceProvider.GetRequiredService<IBusPublisher>();
         _rabbitMqSerializer = _serviceProvider.GetRequiredService<IRabbitMqSerializer>();
-        _conventionsProvider = _serviceProvider.GetRequiredService<IConventioProvider>();
+        _conventionsProvider = _serviceProvider.GetRequiredService<IConventionProvider>();
         _contextProvider = _serviceProvider.GetRequiredService<IContextProvider>();
         _pluginsExecutor = _serviceProvider.GetRequiredService<IRabbitMqPluginsExecutor>();
         _exceptionToMessageMapper = _serviceProvider.GetService<IExceptionToMessageMapper>() ?? ExceptionToMessageMapper;

@@ -7,9 +7,9 @@ namespace Convey.MessageBrokers.RabbitMQ.Publishers;
 internal sealed class RabbitMqPublisher : IBusPublisher
 {
     private readonly IRabbitMqClient _client;
-    private readonly IConventioProvider _conventionsProvider;
+    private readonly IConventionProvider _conventionsProvider;
 
-    public RabbitMqPublisher(IRabbitMqClient client, IConventioProvider conventionsProvider)
+    public RabbitMqPublisher(IRabbitMqClient client, IConventionProvider conventionsProvider)
     {
         _client = client;
         _conventionsProvider = conventionsProvider;
