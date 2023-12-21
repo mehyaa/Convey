@@ -22,10 +22,11 @@ public static class Extensions
 
         builder.AddMongoRepository<InboxMessage, string>(inboxCollection);
         builder.AddMongoRepository<OutboxMessage, string>(outboxCollection);
-        builder.AddInitializer<MongoOutboxInitializer>();
+
         builder.Services.AddTransient<IMessageOutbox, MongoMessageOutbox>();
         builder.Services.AddTransient<IMessageOutboxAccessor, MongoMessageOutbox>();
-        builder.Services.AddTransient<MongoOutboxInitializer>();
+
+        builder.AddInitializer<MongoOutboxInitializer>();
 
         BsonClassMap.RegisterClassMap<OutboxMessage>(m =>
         {

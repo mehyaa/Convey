@@ -66,7 +66,6 @@ public static class Extensions
         builder.Services.AddSingleton<IBusPublisher, RabbitMqPublisher>();
         builder.Services.AddSingleton<IBusSubscriber, RabbitMqSubscriber>();
         builder.Services.AddSingleton<MessageSubscribersChannel>();
-        builder.Services.AddTransient<RabbitMqExchangeInitializer>();
 
         builder.Services.AddHostedService<RabbitMqBackgroundService>();
 

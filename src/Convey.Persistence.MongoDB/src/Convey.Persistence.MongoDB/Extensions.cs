@@ -76,7 +76,6 @@ public static class Extensions
         builder.Services.AddTransient(sp =>
             sp.GetRequiredService<IMongoClient>().GetDatabase(mongoOptions.Database));
 
-        builder.Services.AddTransient<IMongoDbInitializer, MongoDbInitializer>();
         builder.Services.AddTransient<IMongoSessionFactory, MongoSessionFactory>();
 
         if (seederType is null)

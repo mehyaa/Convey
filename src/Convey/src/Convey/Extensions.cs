@@ -51,6 +51,16 @@ public static class Extensions
         return builder;
     }
 
+    public static IConveyBuilder AddInitializer<TInitializer>(
+        this IConveyBuilder builder,
+        Func<IServiceProvider, TInitializer> resolver)
+        where TInitializer : class, IInitializer
+    {
+        builder.Services.AddTransient<IInitializer>(resolver);
+
+        return builder;
+    }
+
     public static TModel GetOptions<TModel>(this IConfiguration configuration, string sectionName)
         where TModel : new()
     {
