@@ -8,6 +8,9 @@ public sealed class SystemTextJsonJsonRabbitMqSerializer : IRabbitMqSerializer
 {
     private readonly JsonSerializerOptions _options;
 
+    public string ContentEncoding { get; } = "UTF-8";
+    public string ContentType { get; } = "application/json";
+
     public SystemTextJsonJsonRabbitMqSerializer(JsonSerializerOptions options = null)
     {
         _options = options ?? new JsonSerializerOptions

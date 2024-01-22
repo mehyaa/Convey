@@ -58,9 +58,9 @@ internal sealed class RabbitMqBackgroundService : BackgroundService
     {
         _serviceProvider = serviceProvider;
 
-        _consumerConnection = serviceProvider.GetRequiredService<ConsumerConnection>().Connection;
-        _producerConnection = serviceProvider.GetRequiredService<ProducerConnection>().Connection;
-        _messageSubscribersChannel = serviceProvider.GetRequiredService<MessageSubscribersChannel>();
+        _consumerConnection = _serviceProvider.GetRequiredService<ConsumerConnection>().Connection;
+        _producerConnection = _serviceProvider.GetRequiredService<ProducerConnection>().Connection;
+        _messageSubscribersChannel = _serviceProvider.GetRequiredService<MessageSubscribersChannel>();
         _publisher = _serviceProvider.GetRequiredService<IBusPublisher>();
         _rabbitMqSerializer = _serviceProvider.GetRequiredService<IRabbitMqSerializer>();
         _conventionsProvider = _serviceProvider.GetRequiredService<IConventionProvider>();

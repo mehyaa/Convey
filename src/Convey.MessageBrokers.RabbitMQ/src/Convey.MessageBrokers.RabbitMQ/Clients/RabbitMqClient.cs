@@ -1,3 +1,4 @@
+using Convey.Types;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System;
@@ -12,6 +13,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
     private readonly object _lockObject = new();
 
+    private readonly AppOptions _appOptions;
     private readonly IConnection _connection;
     private readonly IContextProvider _contextProvider;
     private readonly IRabbitMqSerializer _serializer;
@@ -27,6 +29,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
     private int _channelsCount;
 
     public RabbitMqClient(
+        AppOptions appOptions,
         ProducerConnection connection,
         IContextProvider contextProvider,
         IRabbitMqSerializer serializer,
@@ -34,6 +37,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         ILogger<RabbitMqClient> logger)
     {
         _connection = connection.Connection;
+        _appOptions = appOptions;
         _contextProvider = contextProvider;
         _serializer = serializer;
         _logger = logger;
@@ -95,10 +99,14 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
         var properties = channel.CreateBasicProperties();
 
+        properties.AppId = _appOptions.Service;
+        properties.ContentEncoding = _serializer.ContentEncoding;
+        properties.ContentType = _serializer.ContentType;
         properties.Persistent = _persistMessages;
         properties.MessageId = string.IsNullOrWhiteSpace(messageId) ? Guid.NewGuid().ToString("N") : messageId;
         properties.CorrelationId = string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString("N") : correlationId;
         properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        properties.Type = convention.Type.Name;
         properties.Headers = new Dictionary<string, object>();
 
         if (_contextEnabled)
