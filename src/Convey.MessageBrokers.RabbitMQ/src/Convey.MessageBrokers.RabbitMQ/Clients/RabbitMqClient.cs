@@ -106,7 +106,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         properties.MessageId = string.IsNullOrWhiteSpace(messageId) ? Guid.NewGuid().ToString("N") : messageId;
         properties.CorrelationId = string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString("N") : correlationId;
         properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-        properties.Type = convention.Type.Name;
+        properties.Type = convention.Type?.Name;
         properties.Headers = new Dictionary<string, object>();
 
         if (_contextEnabled)
