@@ -24,7 +24,7 @@
   <Target Name="CopyToLocalNugetSource" AfterTargets="Pack" Condition="'$(GenerateLocalPackages)'=='true'">
     <MakeDir Directories="$(UserProfile)\\.nuget\\$(PackageTarget)" Condition="!Exists('$(UserProfile)\\.nuget\\$(PackageTarget)')" />
     <Exec Command="dotnet nuget push $(OutputPath)..\$(PackageId).$(Version).nupkg --source $(UserProfile)\\.nuget\\$(PackageTarget)\" />
-    <Exec Command="rmdir /q /s $(UserProfile)\\.nuget\\packages\\$(MSBuildProjectName.ToLower())\\$(Version)\"></Exec>
+    <Exec Command="rmdir /q /s $(UserProfile)\\.nuget\\packages\\$(MSBuildProjectName.ToLower())\\$(Version)\" />
   </Target>
 
 </Project>
