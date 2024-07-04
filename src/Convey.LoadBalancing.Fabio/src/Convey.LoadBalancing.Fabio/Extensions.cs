@@ -16,6 +16,8 @@ public static class Extensions
 {
     private const string RegistryName = "loadBalancing.fabio";
     private const string SectionName = "fabio";
+    
+    private const int DefaultTimeoutSeconds = 120;
 
     public static IConveyBuilder AddFabio(
         this IConveyBuilder builder,
@@ -86,12 +88,18 @@ public static class Extensions
         {
             builder.Services.AddTransient<FabioMessageHandler>();
 
-            builder.Services.AddHttpClient<IFabioHttpClient, FabioHttpClient>("fabio-http")
+            builder.Services.AddHttpClient<IFabioHttpClient, FabioHttpClient>("fabio-http", configure =>
+                {
+                    configure.Timeout = httpClientOptions.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+                })
                 .AddHttpMessageHandler<FabioMessageHandler>();
 
             builder.RemoveHttpClient();
 
-            builder.Services.AddHttpClient<IHttpClient, FabioHttpClient>("fabio")
+            builder.Services.AddHttpClient<IHttpClient, FabioHttpClient>("fabio", configure =>
+                {
+                    configure.Timeout = httpClientOptions.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+                })
                 .AddHttpMessageHandler<FabioMessageHandler>();
         }
 
@@ -118,14 +126,19 @@ public static class Extensions
     }
 
     public static void AddFabioHttpClient(this IConveyBuilder builder, string clientName, string serviceName)
-        => builder.Services.AddHttpClient<IHttpClient, FabioHttpClient>(clientName)
+        => builder.Services.AddHttpClient<IHttpClient, FabioHttpClient>(clientName, (sp, configure) =>
+            {
+                var httpClientOptions = sp.GetRequiredService<HttpClientOptions>();
+
+                configure.Timeout = httpClientOptions.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+            })
             .AddHttpMessageHandler(c => new FabioMessageHandler(c.GetRequiredService<FabioOptions>(), serviceName));
 
     private static ServiceRegistration GetConsulRegistration(this IServiceCollection services)
     {
         var serviceDescriptor = services.FirstOrDefault(sd => sd.ServiceType == typeof(ServiceRegistration));
 
-        return serviceDescriptor.ImplementationInstance as ServiceRegistration;
+        return serviceDescriptor?.ImplementationInstance as ServiceRegistration;
     }
 
     private static IList<string> GetFabioTags(string consulService, string fabioService)

@@ -12,6 +12,8 @@ public static class Extensions
 {
     private const string SectionName = "httpClient";
     private const string RegistryName = "http.client";
+    
+    private const int DefaultTimeoutSeconds = 120;
 
     public static IConveyBuilder AddHttpClient(this IConveyBuilder builder, string clientName = "convey",
         IEnumerable<string> maskedRequestUrlParts = null, string sectionName = SectionName,
@@ -58,7 +60,10 @@ public static class Extensions
 
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<IHttpClientSerializer, SystemTextJsonHttpClientSerializer>();
-        var clientBuilder = builder.Services.AddHttpClient<IHttpClient, ConveyHttpClient>(clientName);
+        var clientBuilder = builder.Services.AddHttpClient<IHttpClient, ConveyHttpClient>(clientName, configure =>
+        {
+            configure.Timeout = options.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+        });
         httpClientBuilder?.Invoke(clientBuilder);
 
         if (options.RequestMasking?.Enabled == true)

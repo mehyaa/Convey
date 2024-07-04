@@ -18,6 +18,8 @@ public static class Extensions
     private const string SectionName = "consul";
 
     private const string DefaultInterval = "5s";
+    
+    private const int DefaultTimeoutSeconds = 120;
 
     public static IConveyBuilder AddConsul(
         this IConveyBuilder builder,
@@ -88,12 +90,18 @@ public static class Extensions
         {
             builder.Services.AddTransient<ConsulServiceDiscoveryMessageHandler>();
 
-            builder.Services.AddHttpClient<IConsulHttpClient, ConsulHttpClient>("consul-http")
+            builder.Services.AddHttpClient<IConsulHttpClient, ConsulHttpClient>("consul-http", configure =>
+                {
+                    configure.Timeout = httpClientOptions.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+                })
                 .AddHttpMessageHandler<ConsulServiceDiscoveryMessageHandler>();
 
             builder.RemoveHttpClient();
 
-            builder.Services.AddHttpClient<IHttpClient, ConsulHttpClient>("consul")
+            builder.Services.AddHttpClient<IHttpClient, ConsulHttpClient>("consul", configure =>
+                {
+                    configure.Timeout = httpClientOptions.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+                })
                 .AddHttpMessageHandler<ConsulServiceDiscoveryMessageHandler>();
         }
 
@@ -115,7 +123,12 @@ public static class Extensions
     }
 
     public static void AddConsulHttpClient(this IConveyBuilder builder, string clientName, string serviceName)
-        => builder.Services.AddHttpClient<IHttpClient, ConsulHttpClient>(clientName)
+        => builder.Services.AddHttpClient<IHttpClient, ConsulHttpClient>(clientName, (sp, configure) =>
+            {
+                var httpClientOptions = sp.GetRequiredService<HttpClientOptions>();
+
+                configure.Timeout = httpClientOptions.Timeout ?? TimeSpan.FromSeconds(DefaultTimeoutSeconds);
+            })
             .AddHttpMessageHandler(c =>
                 new ConsulServiceDiscoveryMessageHandler(
                     c.GetRequiredService<IConsulServicesRegistry>(),
