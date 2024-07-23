@@ -95,7 +95,7 @@ public class ConveyHttpClient : IHttpClient
         string uri,
         IHttpClientSerializer serializer = null,
         CancellationToken cancellationToken = default)
-    { 
+    {
         var response = await SendAsync(uri, Method.Head, cancellationToken: cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.OK)
