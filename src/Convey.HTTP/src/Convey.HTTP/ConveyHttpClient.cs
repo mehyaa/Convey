@@ -254,16 +254,17 @@ public class ConveyHttpClient : IHttpClient
         CancellationToken cancellationToken = default)
         => Policy.Handle<Exception>()
             .WaitAndRetryAsync(_options.Retries, r => TimeSpan.FromSeconds(Math.Pow(2, r)))
-            .ExecuteAsync(() => _client.SendAsync(request, cancellationToken));
+            .ExecuteAsync(async () => await _client.SendAsync(await CloneHttpRequestMessageAsync(request, cancellationToken), cancellationToken));
 
     public Task<T> SendAsync<T>(
-        HttpRequestMessage request, IHttpClientSerializer serializer = null,
+        HttpRequestMessage request,
+        IHttpClientSerializer serializer = null,
         CancellationToken cancellationToken = default)
         => Policy.Handle<Exception>()
             .WaitAndRetryAsync(_options.Retries, r => TimeSpan.FromSeconds(Math.Pow(2, r)))
             .ExecuteAsync(async () =>
             {
-                var response = await _client.SendAsync(request, cancellationToken);
+                var response = await _client.SendAsync(await CloneHttpRequestMessageAsync(request, cancellationToken), cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -283,7 +284,7 @@ public class ConveyHttpClient : IHttpClient
             .WaitAndRetryAsync(_options.Retries, r => TimeSpan.FromSeconds(Math.Pow(2, r)))
             .ExecuteAsync(async () =>
             {
-                var response = await _client.SendAsync(request, cancellationToken);
+                var response = await _client.SendAsync(await CloneHttpRequestMessageAsync(request, cancellationToken), cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -410,7 +411,7 @@ public class ConveyHttpClient : IHttpClient
         IHttpClientSerializer serializer = null,
         CancellationToken cancellationToken = default)
     {
-        if (stream is null || stream.CanRead is false)
+        if (stream is null || !stream.CanRead)
         {
             return default;
         }
@@ -428,5 +429,46 @@ public class ConveyHttpClient : IHttpClient
         Put,
         Patch,
         Delete
+    }
+
+    // This method must be called before HttpClient.SendAsync is called, because HttpClient.SendAsync disposes the request message.
+    private async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage predecessor, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var clone = new HttpRequestMessage(predecessor.Method, predecessor.RequestUri);
+
+        if (predecessor.Content is not null)
+        {
+            var ms = new MemoryStream();
+
+            await predecessor.Content.CopyToAsync(ms, cancellationToken);
+
+            ms.Position = 0;
+
+            clone.Content = new StreamContent(ms);
+
+            if (predecessor.Content.Headers is not null)
+            {
+                foreach (var header in predecessor.Content.Headers)
+                {
+                    clone.Content.Headers.Add(header.Key, header.Value);
+                }
+            }
+        }
+
+        clone.Version = predecessor.Version;
+
+        foreach (var option in predecessor.Options)
+        {
+            clone.Options.Set(new HttpRequestOptionsKey<object?>(option.Key), option.Value);
+        }
+
+        foreach (var header in predecessor.Headers)
+        {
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        return clone;
     }
 }
