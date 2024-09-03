@@ -68,7 +68,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
                         .AddWebApiSwaggerDocs())
                 .Configure(app =>
                     app
-                        .UserCorrelationContextLogging()
+                        .UseCorrelationContextLogging()
                         .UseErrorHandler()
                         .UsePrometheus()
                         .UseRouting()

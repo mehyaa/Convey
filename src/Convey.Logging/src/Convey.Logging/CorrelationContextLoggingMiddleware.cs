@@ -17,8 +17,8 @@ public class CorrelationContextLoggingMiddleware : IMiddleware
 
     public Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        var headers = Activity.Current.Baggage
-            .ToDictionary(x => x.Key, x => x.Value);
+        var headers = Activity.Current?.Baggage.ToDictionary(x => x.Key, x => x.Value);
+
         using (_logger.BeginScope(headers))
         {
             return next(context);

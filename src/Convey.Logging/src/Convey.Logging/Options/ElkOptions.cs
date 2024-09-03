@@ -7,5 +7,7 @@ public class ElkOptions
     public bool BasicAuthEnabled { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
+    public bool ApiKeyAuthEnabled { get; set; }
+    public string ApiKey { get; set; }
     public string IndexFormat { get; set; }
 }

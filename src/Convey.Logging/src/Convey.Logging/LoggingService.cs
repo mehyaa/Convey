@@ -1,8 +1,11 @@
-﻿namespace Convey.Logging;
+﻿using Serilog.Core;
 
-public interface ILoggingService
+namespace Convey.Logging;
+
+public class LoggingService : ILoggingService
 {
-    public void SetLoggingLevel(string logEventLevel)
-        => Extensions.LoggingLevelSwitch.MinimumLevel = Extensions.GetLogEventLevel(logEventLevel);
+    internal readonly LoggingLevelSwitch LoggingLevelSwitch = new();
+
+    public void SetLoggingLevel(string level)
+        => LoggingLevelSwitch.MinimumLevel = Extensions.GetLogEventLevel(level);
 }
-public class LoggingService : ILoggingService {}

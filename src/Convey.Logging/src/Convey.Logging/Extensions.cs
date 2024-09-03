@@ -1,21 +1,18 @@
 using Convey.Logging.Options;
 using Convey.Types;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Serilog.Sinks;
+using Elastic.Transport;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Filters;
-using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.Grafana.Loki;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Convey.Logging;
 
@@ -23,13 +20,17 @@ public static class Extensions
 {
     private const string LoggerSectionName = "logger";
     private const string AppSectionName = "app";
-    internal static LoggingLevelSwitch LoggingLevelSwitch = new();
 
-    public static IHostBuilder UseLogging(this IHostBuilder hostBuilder,
-        Action<HostBuilderContext, LoggerConfiguration> configure = null, string loggerSectionName = LoggerSectionName,
+    public static IHostBuilder UseLogging(
+        this IHostBuilder hostBuilder,
+        Action<HostBuilderContext, LoggerConfiguration> configure = null,
+        string loggerSectionName = LoggerSectionName,
         string appSectionName = AppSectionName)
-        => hostBuilder
-            .ConfigureServices(services => services.AddSingleton<ILoggingService, LoggingService>())
+    {
+        var loggingService = new LoggingService();
+
+        return hostBuilder
+            .ConfigureServices(services => services.AddSingleton<ILoggingService>(loggingService))
             .UseSerilog((context, loggerConfiguration) =>
             {
                 if (string.IsNullOrWhiteSpace(loggerSectionName))
@@ -45,47 +46,56 @@ public static class Extensions
                 var loggerOptions = context.Configuration.GetOptions<LoggerOptions>(loggerSectionName);
                 var appOptions = context.Configuration.GetOptions<AppOptions>(appSectionName);
 
-                MapOptions(loggerOptions, appOptions, loggerConfiguration, context.HostingEnvironment.EnvironmentName);
+                MapOptions(
+                    loggingService,
+                    loggerOptions,
+                    appOptions,
+                    loggerConfiguration,
+                    context.HostingEnvironment.EnvironmentName);
+
                 configure?.Invoke(context, loggerConfiguration);
             });
+    }
 
-    public static IEndpointConventionBuilder MapLogLevelHandler(this IEndpointRouteBuilder builder,
-        string endpointRoute = "~/logging/level")
-        => builder.MapPost(endpointRoute, LevelSwitch);
-
-    private static void MapOptions(LoggerOptions loggerOptions, AppOptions appOptions,
-        LoggerConfiguration loggerConfiguration, string environmentName)
+    private static void MapOptions(
+        LoggingService loggingService,
+        LoggerOptions loggerOptions,
+        AppOptions appOptions,
+        LoggerConfiguration loggerConfiguration,
+        string environmentName)
     {
-        LoggingLevelSwitch.MinimumLevel = GetLogEventLevel(loggerOptions.Level);
+        loggingService.SetLoggingLevel(loggerOptions.Level);
 
-        loggerConfiguration.Enrich.FromLogContext()
-            .MinimumLevel.ControlledBy(LoggingLevelSwitch)
+        loggerConfiguration
+            .Enrich.FromLogContext()
+            .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch)
             .Enrich.WithProperty("Environment", environmentName)
             .Enrich.WithProperty("Application", appOptions.Service)
             .Enrich.WithProperty("Instance", appOptions.Instance)
             .Enrich.WithProperty("Version", appOptions.Version);
+        
+        loggerOptions.Tags.ForEach(
+            tag =>
+                loggerConfiguration.Enrich.WithProperty(tag.Key, tag.Value));
+        
+        loggerOptions.MinimumLevelOverrides.ForEach(
+            @override =>
+                loggerConfiguration.MinimumLevel.Override(@override.Key, GetLogEventLevel(@override.Value)));
+        
+        loggerOptions.ExcludePaths.ForEach(
+            excludedPath =>
+                loggerConfiguration.Filter.ByExcluding(Matching.WithProperty<string>("RequestPath", n => n.EndsWith(excludedPath))));
 
-        foreach (var (key, value) in loggerOptions.Tags ?? new Dictionary<string, object>())
-        {
-            loggerConfiguration.Enrich.WithProperty(key, value);
-        }
+        loggerOptions.ExcludeProperties.ForEach(
+            excludedProperty =>
+                loggerConfiguration.Filter.ByExcluding(Matching.WithProperty(excludedProperty)));
 
-        foreach (var (key, value) in loggerOptions.MinimumLevelOverrides ?? new Dictionary<string, string>())
-        {
-            var logLevel = GetLogEventLevel(value);
-            loggerConfiguration.MinimumLevel.Override(key, logLevel);
-        }
-
-        loggerOptions.ExcludePaths?.ToList().ForEach(p => loggerConfiguration.Filter
-            .ByExcluding(Matching.WithProperty<string>("RequestPath", n => n.EndsWith(p))));
-
-        loggerOptions.ExcludeProperties?.ToList().ForEach(p => loggerConfiguration.Filter
-            .ByExcluding(Matching.WithProperty(p)));
-
-        Configure(loggerConfiguration, loggerOptions);
+        Configure(loggingService, loggerConfiguration, loggerOptions);
     }
 
-    private static void Configure(LoggerConfiguration loggerConfiguration,
+    private static void Configure(
+        LoggingService loggingService,
+        LoggerConfiguration loggerConfiguration,
         LoggerOptions options)
     {
         var consoleOptions = options.Console ?? new ConsoleOptions();
@@ -103,33 +113,44 @@ public static class Extensions
         if (fileOptions.Enabled)
         {
             var path = string.IsNullOrWhiteSpace(fileOptions.Path) ? "logs/logs.txt" : fileOptions.Path;
+
             if (!Enum.TryParse<RollingInterval>(fileOptions.Interval, true, out var interval))
             {
                 interval = RollingInterval.Day;
             }
 
-            loggerConfiguration.WriteTo.File(path, rollingInterval: interval);
+            loggerConfiguration
+                .WriteTo.File(path, rollingInterval: interval)
+                .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
         }
 
         if (elkOptions.Enabled)
         {
-            loggerConfiguration.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elkOptions.Url))
-            {
-                AutoRegisterTemplate = true,
-                AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
-                IndexFormat = string.IsNullOrWhiteSpace(elkOptions.IndexFormat)
-                    ? "logstash-{0:yyyy.MM.dd}"
-                    : elkOptions.IndexFormat,
-                ModifyConnectionSettings = connectionConfiguration =>
-                    elkOptions.BasicAuthEnabled
-                        ? connectionConfiguration.BasicAuthentication(elkOptions.Username, elkOptions.Password)
-                        : connectionConfiguration
-            }).MinimumLevel.ControlledBy(LoggingLevelSwitch);
+            loggerConfiguration.WriteTo.Elasticsearch(
+                [new Uri(elkOptions.Url)],
+                opts =>
+                {
+                    opts.BootstrapMethod = BootstrapMethod.Failure;
+                },
+                transport =>
+                {
+                    if (elkOptions.BasicAuthEnabled)
+                    {
+                        transport.Authentication(new BasicAuthentication(elkOptions.Username, elkOptions.Password));
+                    }
+                    else if (elkOptions.ApiKeyAuthEnabled)
+                    {
+                        transport.Authentication(new ApiKey(elkOptions.ApiKey)); 
+                    }
+                })
+                .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
         }
 
         if (seqOptions.Enabled)
         {
-            loggerConfiguration.WriteTo.Seq(seqOptions.Url, apiKey: seqOptions.ApiKey);
+            loggerConfiguration
+                .WriteTo.Seq(seqOptions.Url, apiKey: seqOptions.ApiKey)
+                .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
         }
 
         if (lokiOptions.Enabled)
@@ -142,20 +163,24 @@ public static class Extensions
                     Password = lokiOptions.LokiPassword
                 };
 
-                loggerConfiguration.WriteTo.GrafanaLoki(
-                    lokiOptions.Url,
-                    credentials: auth,
-                    batchPostingLimit: lokiOptions.BatchPostingLimit ?? 1000,
-                    queueLimit: lokiOptions.QueueLimit,
-                    period: lokiOptions.Period).MinimumLevel.ControlledBy(LoggingLevelSwitch);
+                loggerConfiguration
+                    .WriteTo.GrafanaLoki(
+                        lokiOptions.Url,
+                        credentials: auth,
+                        batchPostingLimit: lokiOptions.BatchPostingLimit ?? 1000,
+                        queueLimit: lokiOptions.QueueLimit,
+                        period: lokiOptions.Period)
+                    .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
             }
             else
             {
-                loggerConfiguration.WriteTo.GrafanaLoki(
-                    lokiOptions.Url,
-                    batchPostingLimit: lokiOptions.BatchPostingLimit ?? 1000,
-                    queueLimit: lokiOptions.QueueLimit,
-                    period: lokiOptions.Period).MinimumLevel.ControlledBy(LoggingLevelSwitch); ;
+                loggerConfiguration
+                    .WriteTo.GrafanaLoki(
+                        lokiOptions.Url,
+                        batchPostingLimit: lokiOptions.BatchPostingLimit ?? 1000,
+                        queueLimit: lokiOptions.QueueLimit,
+                        period: lokiOptions.Period)
+                    .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
             }
         }
 
@@ -174,11 +199,17 @@ public static class Extensions
             switch (azureOptions.LogType)
             {
                 case AzureLogType.Event:
-                    loggerConfiguration.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Events);
+                    loggerConfiguration
+                        .WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Events)
+                        .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
+
                     break;
 
                 case AzureLogType.Trace:
-                    loggerConfiguration.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
+                    loggerConfiguration
+                        .WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces)
+                        .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);
+
                     break;
             }
         }
@@ -196,34 +227,36 @@ public static class Extensions
         return builder;
     }
 
-    public static IApplicationBuilder UserCorrelationContextLogging(this IApplicationBuilder app)
+    public static IApplicationBuilder UseCorrelationContextLogging(this IApplicationBuilder app)
     {
         app.UseMiddleware<CorrelationContextLoggingMiddleware>();
 
         return app;
     }
 
-    private static async Task LevelSwitch(HttpContext context)
+    private static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
     {
-        var service = context.RequestServices.GetService<ILoggingService>();
-        if (service is null)
+        ArgumentNullException.ThrowIfNull(action);
+
+        switch (enumerable)
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync("ILoggingService is not registered. Add UseLogging() to your Program.cs.");
-            return;
+            case null:
+                return;
+
+            case List<T> list:
+                list.ForEach(action);
+
+                return;
+
+            case T[] array:
+                Array.ForEach(array, action);
+
+                return;
         }
 
-        var level = context.Request.Query["level"].ToString();
-
-        if (string.IsNullOrEmpty(level))
+        foreach (var item in enumerable)
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync("Invalid value for logging level.");
-            return;
+            action.Invoke(item);
         }
-
-        service.SetLoggingLevel(level);
-
-        context.Response.StatusCode = StatusCodes.Status200OK;
     }
 }
