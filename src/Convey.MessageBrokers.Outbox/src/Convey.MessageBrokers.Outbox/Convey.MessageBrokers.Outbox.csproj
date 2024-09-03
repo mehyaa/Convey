@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup Label="Vulnerability Fix">
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+  </ItemGroup>
+
 </Project>
