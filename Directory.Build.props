@@ -15,6 +15,10 @@
     <GenerateLocalPackages>false</GenerateLocalPackages>
   </PropertyGroup>
 
+  <ItemGroup>
+    <SourceRoot Include="$(MSBuildThisFileDirectory)/"/>
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(GenerateLocalPackages)'=='true'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.0-local</Version>

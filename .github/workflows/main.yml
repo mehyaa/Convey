@@ -14,15 +14,15 @@ jobs:
       BUILD_CONFIG: 'Release'
       SOLUTION: 'Convey.sln'
       DOTNET_VERSION: 8
-      DOTNET_SDK_VERSION: 8.0.100
 
     runs-on: ubuntu-latest
 
     steps:
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-quality: 'ga'
 
     - name: Get Year
       id: date
@@ -43,10 +43,13 @@ jobs:
       run: dotnet restore $SOLUTION --verbosity minimal
 
     - name: Build
-      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal /p:Version="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}"
+      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal --property:Version="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}" --property:DebugType=pdbonly --property:Deterministic=true --property:PublishRepositoryUrl=true --property:EmbedAllSources=true --property:EmbedUntrackedSources=true --property:ContinuousIntegrationBuild=true --property:DeterministicSourcePaths=true --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg
 
     - name: Run Tests
       run: dotnet test --configuration $BUILD_CONFIG --no-restore --no-build --verbosity minimal
 
-    - name: Publish
+    - name: Publish Packages
       run: dotnet nuget push **\*.nupkg --source 'https://nuget.pkg.github.com/mehyaa/index.json' --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+    - name: Publish Symbols
+      run: dotnet nuget push **\*.snupkg --source 'https://nuget.pkg.github.com/mehyaa/index.json' --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
