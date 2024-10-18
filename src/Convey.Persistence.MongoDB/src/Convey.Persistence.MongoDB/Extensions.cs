@@ -5,11 +5,13 @@ using Convey.Persistence.MongoDB.Repositories;
 using Convey.Persistence.MongoDB.Seeders;
 using Convey.Types;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
 using System;
 
 namespace Convey.Persistence.MongoDB;
@@ -71,7 +73,21 @@ public static class Extensions
 
         builder.Services.AddSingleton(mongoOptions);
 
-        builder.Services.AddSingleton<IMongoClient>(new MongoClient(mongoOptions.ConnectionString));
+        builder.Services.AddSingleton<IMongoClient>(sp =>
+        {
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+
+            if (loggerFactory is null)
+            {
+                return new MongoClient(mongoOptions.ConnectionString);
+            }
+
+            var settings = MongoClientSettings.FromUrl(new MongoUrl(mongoOptions.ConnectionString));
+            
+            settings.LoggingSettings = new LoggingSettings(loggerFactory);
+
+            return new MongoClient(settings);
+        });
 
         builder.Services.AddTransient(sp =>
             sp.GetRequiredService<IMongoClient>().GetDatabase(mongoOptions.Database));
