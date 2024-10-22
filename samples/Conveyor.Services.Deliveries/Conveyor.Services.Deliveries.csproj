@@ -16,4 +16,8 @@
     <ProjectReference Include="..\..\src\Convey.WebApi\src\Convey.WebApi\Convey.WebApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="Vulnerability Fix">
+    <PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
+  </ItemGroup>
+
 </Project>

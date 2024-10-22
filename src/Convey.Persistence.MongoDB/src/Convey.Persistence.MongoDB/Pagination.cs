@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Convey.CQRS.Queries;
-using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Convey.Persistence.MongoDB;
 
 public static class Pagination
 {
-    public static async Task<PagedResult<T>> PaginateAsync<T>(this IMongoQueryable<T> collection, IPagedQuery query)
+    public static async Task<PagedResult<T>> PaginateAsync<T>(this IQueryable<T> collection, IPagedQuery query)
         => await collection.PaginateAsync(query.OrderBy, query.SortOrder, query.Page, query.Results);
 
-    public static async Task<PagedResult<T>> PaginateAsync<T>(this IMongoQueryable<T> collection, string orderBy,
+    public static async Task<PagedResult<T>> PaginateAsync<T>(this IQueryable<T> collection, string orderBy,
         string sortOrder, int page = 1, int resultsPerPage = 10)
     {
         if (page <= 0)
@@ -54,10 +54,10 @@ public static class Pagination
         return PagedResult<T>.Create(data, page, resultsPerPage, totalPages, totalResults);
     }
 
-    public static IMongoQueryable<T> Limit<T>(this IMongoQueryable<T> collection, IPagedQuery query)
+    public static IQueryable<T> Limit<T>(this IQueryable<T> collection, IPagedQuery query)
         => collection.Limit(query.Page, query.Results);
 
-    public static IMongoQueryable<T> Limit<T>(this IMongoQueryable<T> collection,
+    public static IQueryable<T> Limit<T>(this IQueryable<T> collection,
         int page = 1, int resultsPerPage = 10)
     {
         if (page <= 0)
