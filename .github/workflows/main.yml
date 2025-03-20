@@ -37,16 +37,16 @@ jobs:
       uses: NuGet/setup-nuget@v1
 
     - name: Clean Solution
-      run: dotnet clean --verbosity minimal
+      run: dotnet clean --verbosity detailed
 
     - name: Restore Dependencies
-      run: dotnet restore $SOLUTION --verbosity minimal
+      run: dotnet restore $SOLUTION --verbosity detailed
 
     - name: Build
-      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity minimal --property:Version="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}" --property:DebugType=pdbonly --property:Deterministic=true --property:PublishRepositoryUrl=true --property:EmbedAllSources=true --property:EmbedUntrackedSources=true --property:ContinuousIntegrationBuild=true --property:DeterministicSourcePaths=true --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg
+      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore --verbosity detailed --property:Version="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}" --property:DebugType=pdbonly --property:Deterministic=true --property:PublishRepositoryUrl=true --property:EmbedAllSources=true --property:EmbedUntrackedSources=true --property:ContinuousIntegrationBuild=true --property:DeterministicSourcePaths=true --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg
 
     - name: Run Tests
-      run: dotnet test --configuration $BUILD_CONFIG --no-restore --no-build --verbosity minimal
+      run: dotnet test --configuration $BUILD_CONFIG --no-restore --no-build --verbosity detailed
 
     - name: Publish Packages
       run: dotnet nuget push **\*.nupkg --source 'https://nuget.pkg.github.com/mehyaa/index.json' --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
