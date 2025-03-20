@@ -461,7 +461,7 @@ public class ConveyHttpClient : IHttpClient
 
         foreach (var option in predecessor.Options)
         {
-            clone.Options.Set(new HttpRequestOptionsKey<object?>(option.Key), option.Value);
+            clone.Options.Set(new HttpRequestOptionsKey<object>(option.Key), option.Value);
         }
 
         foreach (var header in predecessor.Headers)

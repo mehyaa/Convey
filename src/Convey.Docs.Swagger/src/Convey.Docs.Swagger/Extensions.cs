@@ -2,6 +2,7 @@ using System;
 using Convey.Docs.Swagger.Builders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 
 namespace Convey.Docs.Swagger;
@@ -70,7 +71,7 @@ public static class Extensions
             .UseSwagger(c => 
             {
                 c.RouteTemplate = string.Concat(routePrefix, "/{documentName}/swagger.json");
-                c.SerializeAsV2 = options.SerializeAsOpenApiV2;
+                c.OpenApiVersion = options.SerializeAsOpenApiV2 ? OpenApiSpecVersion.OpenApi2_0 : OpenApiSpecVersion.OpenApi3_0;
             });
 
         return options.ReDocEnabled
