@@ -2,7 +2,7 @@ using Convey.Tracing.Jaeger.Builders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.ResourceDetectors.Container;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System;
 using System.Threading;
@@ -51,7 +51,7 @@ public static class Extensions
             .AddOpenTelemetry()
             .WithTracing(providerBuilder =>
                 providerBuilder
-                    .ConfigureResource(resource => resource.AddDetector(new ContainerResourceDetector()))
+                    .ConfigureResource(resource => resource.AddContainerDetector())
                     .AddAspNetCoreInstrumentation(string.Empty, aspCoreOptions =>
                     {
                         aspCoreOptions.Filter =
