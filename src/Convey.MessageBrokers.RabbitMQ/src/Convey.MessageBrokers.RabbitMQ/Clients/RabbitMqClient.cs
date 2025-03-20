@@ -163,7 +163,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
             cancellationToken: cancellationToken);
     }
 
-    private void IncludeMessageContext(object context, IBasicProperties properties)
+    private void IncludeMessageContext(object context, BasicProperties properties)
     {
         if (properties?.Headers is null)
         {
