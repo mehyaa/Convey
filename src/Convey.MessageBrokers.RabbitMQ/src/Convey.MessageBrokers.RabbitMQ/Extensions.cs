@@ -100,7 +100,6 @@ public static class Extensions
             SocketWriteTimeout = options.SocketWriteTimeout,
             RequestedChannelMax = options.RequestedChannelMax,
             RequestedFrameMax = options.RequestedFrameMax,
-            DispatchConsumersAsync = true,
             ContinuationTimeout = options.ContinuationTimeout,
             HandshakeContinuationTimeout = options.HandshakeContinuationTimeout,
             NetworkRecoveryInterval = options.NetworkRecoveryInterval,
@@ -113,8 +112,8 @@ public static class Extensions
         connectionFactoryConfigurator?.Invoke(connectionFactory);
 
         logger.LogDebug("Connecting to RabbitMQ: '{Hostnames}'...", string.Join(", ", options.HostNames));
-        var consumerConnection = connectionFactory.CreateConnection(options.HostNames.ToList(), $"{options.ConnectionName}_consumer");
-        var producerConnection = connectionFactory.CreateConnection(options.HostNames.ToList(), $"{options.ConnectionName}_producer");
+        var consumerConnection = connectionFactory.CreateConnectionAsync(options.HostNames.ToList(), $"{options.ConnectionName}_consumer").GetAwaiter().GetResult();
+        var producerConnection = connectionFactory.CreateConnectionAsync(options.HostNames.ToList(), $"{options.ConnectionName}_producer").GetAwaiter().GetResult();
         logger.LogDebug("Connected to RabbitMQ: '{Hostnames}'", string.Join(", ", options.HostNames));
 
         builder.Services.AddSingleton(new ConsumerConnection(consumerConnection));
