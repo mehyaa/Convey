@@ -4,6 +4,8 @@ using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Convey.MessageBrokers.RabbitMQ.Clients;
 
@@ -11,7 +13,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 {
     private const string EmptyContext = "{}";
 
-    private readonly object _lockObject = new();
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     private readonly AppOptions _appOptions;
     private readonly IConnection _connection;
@@ -24,7 +26,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
     private readonly bool _persistMessages;
     private readonly int _maxChannels;
 
-    private readonly ConcurrentDictionary<int, IModel> _channels = new();
+    private readonly ConcurrentDictionary<int, IChannel> _channels = new();
 
     private int _channelsCount;
 
@@ -48,21 +50,24 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         _maxChannels = options.MaxProducerChannels <= 0 ? 1000 : options.MaxProducerChannels;
     }
 
-    public void Send(
+    public async Task SendAsync(
         object message,
         IConvention convention,
         string messageId = null,
         string correlationId = null,
         string spanContext = null,
         object messageContext = null,
-        IDictionary<string, object> headers = null)
+        IDictionary<string, object> headers = null,
+        CancellationToken cancellationToken = default)
     {
         var threadId = Environment.CurrentManagedThreadId;
 
         if (!_channels.TryGetValue(threadId, out var channel))
         {
-            lock (_lockObject)
+            try
             {
+                await _semaphore.WaitAsync(cancellationToken);
+
                 if (_channelsCount >= _maxChannels)
                 {
                     throw new InvalidOperationException(
@@ -71,7 +76,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
                         "Modify `MaxProducerChannels` setting to allow more channels.");
                 }
 
-                channel = _connection.CreateModel();
+                channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
                 _channels.TryAdd(threadId, channel);
                 _channelsCount++;
 
@@ -83,6 +88,10 @@ internal sealed class RabbitMqClient : IRabbitMqClient
                         _channelsCount,
                         _maxChannels);
                 }
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
         else
@@ -97,17 +106,18 @@ internal sealed class RabbitMqClient : IRabbitMqClient
             }
         }
 
-        var properties = channel.CreateBasicProperties();
-
-        properties.AppId = _appOptions.Service;
-        properties.ContentEncoding = _serializer.ContentEncoding;
-        properties.ContentType = _serializer.ContentType;
-        properties.Persistent = _persistMessages;
-        properties.MessageId = string.IsNullOrWhiteSpace(messageId) ? Guid.NewGuid().ToString("N") : messageId;
-        properties.CorrelationId = string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString("N") : correlationId;
-        properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-        properties.Type = convention.Type?.Name;
-        properties.Headers = new Dictionary<string, object>();
+        var properties = new BasicProperties
+        {
+            AppId = _appOptions.Service,
+            ContentEncoding = _serializer.ContentEncoding,
+            ContentType = _serializer.ContentType,
+            Persistent = _persistMessages,
+            MessageId = string.IsNullOrWhiteSpace(messageId) ? Guid.NewGuid().ToString("N") : messageId,
+            CorrelationId = string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString("N") : correlationId,
+            Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
+            Type = convention.Type?.Name,
+            Headers = new Dictionary<string, object>()
+        };
 
         if (_contextEnabled)
         {
@@ -144,11 +154,22 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
         var body = _serializer.Serialize(message);
 
-        channel.BasicPublish(convention.Exchange, convention.RoutingKey, properties, body.ToArray());
+        await channel.BasicPublishAsync(
+            exchange: convention.Exchange,
+            routingKey: convention.RoutingKey,
+            mandatory: false,
+            basicProperties: properties,
+            body: body.ToArray(),
+            cancellationToken: cancellationToken);
     }
 
     private void IncludeMessageContext(object context, IBasicProperties properties)
     {
+        if (properties?.Headers is null)
+        {
+            return;
+        }
+
         if (context is not null)
         {
             properties.Headers.Add(_contextProvider.HeaderName, _serializer.Serialize(context).ToArray());

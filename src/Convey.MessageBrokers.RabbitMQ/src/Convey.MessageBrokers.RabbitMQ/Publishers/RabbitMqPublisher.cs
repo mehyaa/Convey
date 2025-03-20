@@ -24,16 +24,13 @@ internal sealed class RabbitMqPublisher : IBusPublisher
         IDictionary<string, object> headers = null,
         CancellationToken cancellationToken = default)
         where T : class
-    {
-        _client.Send(
+        => _client.SendAsync(
             message,
             _conventionsProvider.Get(message.GetType()),
             messageId,
             correlationId,
             spanContext,
             messageContext,
-            headers);
-
-        return Task.CompletedTask;
-    }
+            headers,
+            cancellationToken);
 }

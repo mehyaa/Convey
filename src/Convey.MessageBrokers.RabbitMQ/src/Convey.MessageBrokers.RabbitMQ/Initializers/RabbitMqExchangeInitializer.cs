@@ -31,37 +31,39 @@ public class RabbitMqExchangeInitializer : IInitializer
         _loggerEnabled = _options.Logger?.Enabled == true;
     }
 
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var exchanges =
             AppDomain.CurrentDomain
                 .GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.IsDefined(typeof(MessageAttribute), false))
-                .Select(t => t.GetCustomAttribute<MessageAttribute>().Exchange)
+                .Select(t => t.GetCustomAttribute<MessageAttribute>()?.Exchange)
                 .Distinct()
                 .ToArray();
 
-        using var channel = _connection.CreateModel();
+        await using var channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
         if (_options.Exchange?.Declare == true)
         {
             Log(_options.Exchange.Name, _options.Exchange.Type);
 
-            channel.ExchangeDeclare(
+            await channel.ExchangeDeclareAsync(
                 _options.Exchange.Name,
                 _options.Exchange.Type,
                 _options.Exchange.Durable,
-                _options.Exchange.AutoDelete);
+                _options.Exchange.AutoDelete,
+                cancellationToken: cancellationToken);
 
             if (_options.DeadLetter?.Enabled is true &&
                 _options.DeadLetter?.Declare is true)
             {
-                channel.ExchangeDeclare(
+                await channel.ExchangeDeclareAsync(
                     $"{_options.DeadLetter.Prefix}{_options.Exchange.Name}{_options.DeadLetter.Suffix}",
                     ExchangeType.Direct,
                     _options.Exchange.Durable,
-                    _options.Exchange.AutoDelete);
+                    _options.Exchange.AutoDelete,
+                    cancellationToken: cancellationToken);
             }
         }
 
@@ -74,12 +76,10 @@ public class RabbitMqExchangeInitializer : IInitializer
 
             Log(exchange, DefaultType);
 
-            channel.ExchangeDeclare(exchange, DefaultType, true);
+            await channel.ExchangeDeclareAsync(exchange, DefaultType, true, cancellationToken: cancellationToken);
         }
 
-        channel.Close();
-
-        return Task.CompletedTask;
+        await channel.CloseAsync(cancellationToken: cancellationToken);
     }
 
     private void Log(string exchange, string type)
