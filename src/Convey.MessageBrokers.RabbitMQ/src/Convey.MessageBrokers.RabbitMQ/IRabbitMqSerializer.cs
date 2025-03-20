@@ -6,7 +6,7 @@ public interface IRabbitMqSerializer
 {
     string ContentEncoding { get; }
     string ContentType { get; }
-    ReadOnlySpan<byte> Serialize(object value);
-    object Deserialize(ReadOnlySpan<byte> value, Type type);
-    object Deserialize(ReadOnlySpan<byte> value);
+    byte[] Serialize(object value);
+    object Deserialize(byte[] value, Type type);
+    object Deserialize(byte[] value);
 }

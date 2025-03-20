@@ -159,7 +159,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
             routingKey: convention.RoutingKey,
             mandatory: false,
             basicProperties: properties,
-            body: body.ToArray(),
+            body: body,
             cancellationToken: cancellationToken);
     }
 
@@ -172,7 +172,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
         if (context is not null)
         {
-            properties.Headers.Add(_contextProvider.HeaderName, _serializer.Serialize(context).ToArray());
+            properties.Headers.Add(_contextProvider.HeaderName, _serializer.Serialize(context));
 
             return;
         }

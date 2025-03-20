@@ -252,7 +252,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                 var messageId = args.BasicProperties.MessageId;
                 var correlationId = args.BasicProperties.CorrelationId;
                 var timestamp = args.BasicProperties.Timestamp.UnixTime;
-                var message = _rabbitMqSerializer.Deserialize(args.Body.Span, messageSubscriber.Type);
+                var message = _rabbitMqSerializer.Deserialize(args.Body.ToArray(), messageSubscriber.Type);
 
                 if (_loggerEnabled)
                 {
