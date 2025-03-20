@@ -18,12 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-#    - name: Setup .NET
-#      uses: actions/setup-dotnet@v4
-#      with:
-#        dotnet-version: ${{ env.DOTNET_VERSION }}
-#        dotnet-quality: 'ga'
-
     - name: Get Year
       id: date
       uses: josStorer/get-current-time@v2
@@ -33,22 +27,12 @@ jobs:
     - name: Checkout Source
       uses: actions/checkout@v2
 
-#    - name: Setup NuGet
-#      uses: NuGet/setup-nuget@v1
-
-#    - name: Clean Solution
-#      run: dotnet clean --verbosity minimal
-#
-#    - name: Restore Dependencies
-#      run: dotnet restore $SOLUTION --verbosity minimal
-
     - name: Build
       run: |
         VERSION="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}"
 
         dotnet build $SOLUTION \
           --configuration $BUILD_CONFIG \
-#          --no-restore \
           --verbosity minimal \
           --property:Version="$VERSION" \
           --property:DebugType=pdbonly \
