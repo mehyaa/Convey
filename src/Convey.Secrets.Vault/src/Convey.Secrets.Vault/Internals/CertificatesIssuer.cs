@@ -50,7 +50,7 @@ internal sealed class CertificatesIssuer : ICertificatesIssuer
                         _options.ExcludeCommonNameFromSubjectAlternativeNames
                 }, _mountPoint);
 
-        var certificate = new X509Certificate2(Encoding.UTF8.GetBytes(credentials.Data.CertificateContent));
+        var certificate = X509CertificateLoader.LoadCertificate(Encoding.UTF8.GetBytes(credentials.Data.CertificateContent));
         if (!_options.ImportPrivateKey || _privateKeyFormat != PrivateKeyFormat.der)
         {
             return certificate;

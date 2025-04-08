@@ -16,7 +16,7 @@ public class SecurityOptions
         public IDictionary<string, AclOptions> Acl { get; set; }
         public bool SkipRevocationCheck { get; set; }
 
-        public string GetHeaderName() => string.IsNullOrWhiteSpace(Header) ? "Certificate" : Header;
+        public string GetHeaderName() => string.IsNullOrWhiteSpace(Header) ? "X-Client-Cert" : Header;
 
         public class AclOptions
         {

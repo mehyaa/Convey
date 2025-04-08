@@ -44,7 +44,7 @@ public static class Extensions
             c.HeaderConverter = headerValue =>
                 string.IsNullOrWhiteSpace(headerValue)
                     ? null
-                    : new X509Certificate2(StringToByteArray(headerValue));
+                    : X509CertificateLoader.LoadPkcs12(StringToByteArray(headerValue), null);
         });
 
         return builder;
