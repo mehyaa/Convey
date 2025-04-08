@@ -13,7 +13,7 @@ jobs:
     env:
       BUILD_CONFIG: 'Release'
       SOLUTION: 'Convey.sln'
-      DOTNET_VERSION: 8
+      DOTNET_VERSION: 9
 
     runs-on: ubuntu-latest
 
