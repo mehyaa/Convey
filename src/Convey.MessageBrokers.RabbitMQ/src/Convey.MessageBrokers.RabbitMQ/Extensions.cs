@@ -165,7 +165,7 @@ public static class Extensions
 
             chain = new X509Chain();
 
-            var signerCertificate2 = new X509Certificate2(options.Ssl.CaCertificatePath);
+            var signerCertificate2 = X509CertificateLoader.LoadPkcs12FromFile(options.Ssl.CaCertificatePath, null);
             chain.ChainPolicy.ExtraStore.Add(signerCertificate2);
 
             var certificate2 = new X509Certificate2(certificate);
