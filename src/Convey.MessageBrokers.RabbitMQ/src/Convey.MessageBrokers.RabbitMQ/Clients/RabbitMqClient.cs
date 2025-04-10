@@ -25,6 +25,8 @@ internal sealed class RabbitMqClient : IRabbitMqClient
     private readonly string _spanContextHeader;
     private readonly bool _persistMessages;
     private readonly int _maxChannels;
+    private readonly string _contentType;
+    private readonly string _contentEncoding;
 
     private readonly ConcurrentDictionary<int, IChannel> _channels = new();
 
@@ -48,6 +50,8 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         _spanContextHeader = options.GetSpanContextHeader();
         _persistMessages = options?.MessagesPersisted ?? false;
         _maxChannels = options.MaxProducerChannels <= 0 ? 1000 : options.MaxProducerChannels;
+        _contentType = options.Publish?.ContentType ?? "application/json";
+        _contentEncoding = options.Publish?.ContentEncoding ?? "UTF-8";
     }
 
     public async Task SendAsync(
@@ -109,8 +113,8 @@ internal sealed class RabbitMqClient : IRabbitMqClient
         var properties = new BasicProperties
         {
             AppId = _appOptions.Service,
-            ContentEncoding = _serializer.ContentEncoding,
-            ContentType = _serializer.ContentType,
+            ContentEncoding = _contentEncoding,
+            ContentType = _contentType,
             Persistent = _persistMessages,
             MessageId = string.IsNullOrWhiteSpace(messageId) ? Guid.NewGuid().ToString("N") : messageId,
             CorrelationId = string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString("N") : correlationId,
@@ -121,7 +125,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
         if (_contextEnabled)
         {
-            IncludeMessageContext(messageContext, properties);
+            await IncludeMessageContextAsync(messageContext, properties, cancellationToken);
         }
 
         if (!string.IsNullOrWhiteSpace(spanContext))
@@ -152,7 +156,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
                 properties.CorrelationId);
         }
 
-        var body = _serializer.Serialize(message);
+        var body = await _serializer.SerializeAsync(message, _contentType, cancellationToken);
 
         await channel.BasicPublishAsync(
             exchange: convention.Exchange,
@@ -163,7 +167,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
             cancellationToken: cancellationToken);
     }
 
-    private void IncludeMessageContext(object context, BasicProperties properties)
+    private async Task IncludeMessageContextAsync(object context, BasicProperties properties, CancellationToken cancellationToken)
     {
         if (properties?.Headers is null)
         {
@@ -172,7 +176,7 @@ internal sealed class RabbitMqClient : IRabbitMqClient
 
         if (context is not null)
         {
-            properties.Headers.Add(_contextProvider.HeaderName, _serializer.Serialize(context));
+            properties.Headers.Add(_contextProvider.HeaderName, await _serializer.SerializeAsync(context, _contentType, cancellationToken));
 
             return;
         }

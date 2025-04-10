@@ -129,6 +129,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
     private async Task SubscribeAsync(IMessageSubscriber messageSubscriber)
     {
         var convention = _conventionsProvider.Get(messageSubscriber.Type);
+        
         var channelKey = GetChannelKey(convention);
 
         if (_channels.ContainsKey(channelKey))
@@ -167,7 +168,12 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
 
         var deadLetterExchange =
             deadLetterEnabled
-                ? $"{_options.DeadLetter.Prefix}{_options.Exchange.Name}{_options.DeadLetter.Suffix}"
+                ? $"{_options.DeadLetter.Prefix}{convention.Exchange}{_options.DeadLetter.Suffix}"
+                : string.Empty;
+
+        var deadLetterRoutingKey =
+            deadLetterEnabled
+                ? $"{_options.DeadLetter.Prefix}{convention.RoutingKey}{_options.DeadLetter.Suffix}"
                 : string.Empty;
 
         var deadLetterQueue =
@@ -191,7 +197,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                     ? new Dictionary<string, object>
                     {
                         {"x-dead-letter-exchange", deadLetterExchange},
-                        {"x-dead-letter-routing-key", deadLetterQueue},
+                        {"x-dead-letter-routing-key", deadLetterRoutingKey},
                     }
                     : [];
 
@@ -201,7 +207,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
         await channel.QueueBindAsync(convention.Queue, convention.Exchange, convention.RoutingKey);
         await channel.BasicQosAsync(_qosOptions.PrefetchSize, _qosOptions.PrefetchCount, _qosOptions.Global);
 
-        if (_options.DeadLetter?.Enabled is true)
+        if (deadLetterEnabled)
         {
             if (_options.DeadLetter.Declare)
             {
@@ -223,8 +229,9 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                 }
 
                 _logger.LogInformation(
-                    "Declaring a dead letter queue: '{Queue}' for an exchange: '{Exchange}', message TTL: {TTL} ms",
+                    "Declaring a dead letter queue: '{Queue}' with routing key: '{RoutingKey}' for an exchange: '{Exchange}', message TTL: {TTL} ms",
                     deadLetterQueue,
+                    deadLetterRoutingKey,
                     deadLetterExchange,
                     ttl);
 
@@ -236,7 +243,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                     deadLetterArgs);
             }
 
-            await channel.QueueBindAsync(deadLetterQueue, deadLetterExchange, deadLetterQueue);
+            await channel.QueueBindAsync(deadLetterQueue, deadLetterExchange, deadLetterRoutingKey);
         }
 
         var consumer = new AsyncEventingBasicConsumer(channel);
@@ -248,11 +255,19 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                 using var scope = _serviceProvider.CreateScope();
 
                 var scopedServiceProvider = scope.ServiceProvider;
+                
+                var cancellationToken = CancellationToken.None;
 
                 var messageId = args.BasicProperties.MessageId;
                 var correlationId = args.BasicProperties.CorrelationId;
                 var timestamp = args.BasicProperties.Timestamp.UnixTime;
-                var message = _rabbitMqSerializer.Deserialize(args.Body.ToArray(), messageSubscriber.Type);
+
+                var message =
+                    await _rabbitMqSerializer.DeserializeAsync(
+                        args.Body.ToArray(),
+                        messageSubscriber.Type,
+                        args.BasicProperties.ContentType,
+                        cancellationToken);
 
                 if (_loggerEnabled)
                 {
@@ -271,7 +286,14 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                         messagePayload);
                 }
 
-                var correlationContext = BuildCorrelationContext(scopedServiceProvider, args, message, messageSubscriber.Type);
+                var correlationContext =
+                    await BuildCorrelationContextAsync(
+                        scopedServiceProvider,
+                        args,
+                        message,
+                        messageSubscriber.Type,
+                        args.BasicProperties.ContentType,
+                        cancellationToken);
 
                 Task Next(object m, object ctx, BasicDeliverEventArgs a)
                     => TryHandleAsync(channel, m, messageId, correlationId, ctx, a, scopedServiceProvider, messageSubscriber.Handle, deadLetterEnabled);
@@ -289,7 +311,13 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
         await channel.BasicConsumeAsync(convention.Queue, false, consumer);
     }
 
-    private object BuildCorrelationContext(IServiceProvider serviceProvider, BasicDeliverEventArgs args, object message, Type messageType)
+    private async Task<object> BuildCorrelationContextAsync(
+        IServiceProvider serviceProvider,
+        BasicDeliverEventArgs args,
+        object message,
+        Type messageType,
+        string contentType,
+        CancellationToken cancellationToken = default)
     {
         var messagePropertiesAccessor = serviceProvider.GetRequiredService<IMessagePropertiesAccessor>();
 
@@ -304,7 +332,8 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
         messagePropertiesAccessor.MessageProperties = messageProperties;
 
         var correlationContextAccessor = serviceProvider.GetRequiredService<ICorrelationContextAccessor>();
-        var correlationContext = _contextProvider.Get(message, messageType, messageProperties);
+
+        var correlationContext = await _contextProvider.GetAsync(message, messageType, messageProperties, contentType, cancellationToken);
 
         correlationContextAccessor.CorrelationContext = correlationContext;
 
@@ -375,7 +404,12 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(
+					ex,
+					"Handling a message: {MessageName} with ID: {MessageId}, Correlation ID: {CorrelationId} failed",
+                    messageName,
+                    messageId,
+                    correlationId);
 
                 if (ex is RabbitMqMessageProcessingTimeoutException)
                 {

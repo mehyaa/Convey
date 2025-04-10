@@ -25,22 +25,6 @@ public class ConventionBuilder : IConventionBuilder
                 StringComparison.InvariantCultureIgnoreCase) == true;
     }
 
-    public string GetRoutingKey(Type type)
-    {
-        var routingKey = type.Name;
-
-        if (_options.Conventions?.MessageAttribute?.IgnoreRoutingKey is true)
-        {
-            return WithCasing(routingKey);
-        }
-
-        var attribute = GeAttribute(type);
-
-        routingKey = string.IsNullOrWhiteSpace(attribute?.RoutingKey) ? routingKey : attribute.RoutingKey;
-
-        return WithCasing(routingKey);
-    }
-
     public string GetExchange(Type type)
     {
         var exchange =
@@ -58,6 +42,22 @@ public class ConventionBuilder : IConventionBuilder
         exchange = string.IsNullOrWhiteSpace(attribute?.Exchange) ? exchange : attribute.Exchange;
 
         return WithCasing(exchange);
+    }
+
+    public string GetRoutingKey(Type type)
+    {
+        var routingKey = type.Name;
+
+        if (_options.Conventions?.MessageAttribute?.IgnoreRoutingKey is true)
+        {
+            return WithCasing(routingKey);
+        }
+
+        var attribute = GeAttribute(type);
+
+        routingKey = string.IsNullOrWhiteSpace(attribute?.RoutingKey) ? routingKey : attribute.RoutingKey;
+
+        return WithCasing(routingKey);
     }
 
     public string GetQueue(Type type)

@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Convey.MessageBrokers.RabbitMQ.Contexts;
 
@@ -18,7 +20,12 @@ internal sealed class ContextProvider : IContextProvider
                 : options.Context.Header;
     }
 
-    public object Get(object message, Type messageType, MessageProperties messageProperties)
+    public async Task<object> GetAsync(
+        object message,
+        Type messageType,
+        MessageProperties messageProperties,
+        string contentType,
+        CancellationToken cancellationToken = default)
     {
         if (messageProperties.Headers is null)
         {
@@ -32,7 +39,7 @@ internal sealed class ContextProvider : IContextProvider
 
         if (context is byte[] bytes)
         {
-            return _serializer.Deserialize(bytes);
+            return await _serializer.DeserializeAsync<object>(bytes, contentType, cancellationToken);
         }
 
         return null;

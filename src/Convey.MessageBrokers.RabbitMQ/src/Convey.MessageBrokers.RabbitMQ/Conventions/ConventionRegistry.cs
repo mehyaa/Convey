@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Convey.MessageBrokers.RabbitMQ;
+namespace Convey.MessageBrokers.RabbitMQ.Conventions;
 
 public class ConventionRegistry : IConventionRegistry
 {

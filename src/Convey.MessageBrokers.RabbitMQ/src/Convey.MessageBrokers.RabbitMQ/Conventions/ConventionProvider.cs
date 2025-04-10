@@ -16,8 +16,6 @@ public class ConventionProvider : IConventionProvider
         _builder = builder;
     }
 
-    public IConvention Get<T>() => Get(typeof(T));
-
     public IConvention Get(Type type)
     {
         if (_conventions.TryGetValue(type, out var convention))
@@ -29,8 +27,8 @@ public class ConventionProvider : IConventionProvider
             _registry.Get(type) ??
             new MessageConvention(
                 type,
-                _builder.GetRoutingKey(type),
                 _builder.GetExchange(type),
+                _builder.GetRoutingKey(type),
                 _builder.GetQueue(type));
 
         _conventions.TryAdd(type, convention);
