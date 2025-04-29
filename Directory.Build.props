@@ -25,6 +25,16 @@
     <PackageTarget>convey</PackageTarget>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(SourceLinkCreate)'=='true'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(SourceLinkCreate)'=='true'">
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedAllSources>true</EmbedAllSources>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
   <Target Name="CopyToLocalNugetSource" AfterTargets="Pack" Condition="'$(GenerateLocalPackages)'=='true'">
     <MakeDir Directories="$(UserProfile)\\.nuget\\$(PackageTarget)" Condition="!Exists('$(UserProfile)\\.nuget\\$(PackageTarget)')" />
     <Exec Command="dotnet nuget push $(OutputPath)..\$(PackageId).$(Version).nupkg --source $(UserProfile)\\.nuget\\$(PackageTarget)\" />

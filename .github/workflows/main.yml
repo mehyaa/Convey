@@ -42,13 +42,11 @@ jobs:
           --configuration $BUILD_CONFIG \
           --verbosity minimal \
           --property:Version="$VERSION" \
-          --property:DebugType=pdbonly \
-          --property:Deterministic=true \
-          --property:PublishRepositoryUrl=true \
-          --property:EmbedAllSources=true \
-          --property:EmbedUntrackedSources=true \
           --property:ContinuousIntegrationBuild=true \
+          --property:Deterministic=true \
           --property:DeterministicSourcePaths=true \
+          --property:SourceLinkCreate=true \
+          --property:DebugType=pdbonly \
           --property:IncludeSymbols=true \
           --property:SymbolPackageFormat=snupkg
 
