@@ -109,8 +109,8 @@ internal sealed class Encryptor : IEncryptor
         aes.Key = key;
         aes.IV = iv;
         var transform = aes.CreateDecryptor(aes.Key, aes.IV);
-        using var memoryStream = new MemoryStream(data);
-        using var cryptoStream = new CryptoStream(memoryStream, transform, CryptoStreamMode.Read);
+        using var memoryStream = new MemoryStream();
+        using var cryptoStream = new CryptoStream(memoryStream, transform, CryptoStreamMode.Write);
         cryptoStream.Write(data, 0, data.Length);
         cryptoStream.FlushFinalBlock();
 
