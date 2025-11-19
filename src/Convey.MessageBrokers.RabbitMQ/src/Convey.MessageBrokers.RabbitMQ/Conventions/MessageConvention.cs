@@ -5,15 +5,15 @@ namespace Convey.MessageBrokers.RabbitMQ.Conventions;
 public class MessageConvention : IConvention
 {
     public Type Type { get; }
-    public string RoutingKey { get; }
     public string Exchange { get; }
+    public string RoutingKey { get; }
     public string Queue { get; }
 
-    public MessageConvention(Type type, string routingKey, string exchange, string queue)
+    public MessageConvention(Type type, string exchange, string routingKey, string queue)
     {
         Type = type;
-        RoutingKey = routingKey;
         Exchange = exchange;
+        RoutingKey = routingKey;
         Queue = queue;
     }
 }

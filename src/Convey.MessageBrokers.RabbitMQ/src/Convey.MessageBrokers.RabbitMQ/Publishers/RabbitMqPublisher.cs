@@ -26,7 +26,7 @@ internal sealed class RabbitMqPublisher : IBusPublisher
         where T : class
         => _client.SendAsync(
             message,
-            _conventionsProvider.Get(message.GetType()),
+            _conventionsProvider.Get<T>(),
             messageId,
             correlationId,
             spanContext,

@@ -33,6 +33,7 @@ public class RabbitMqOptions
     public DeadLetterOptions DeadLetter { get; set; }
     public QosOptions Qos { get; set; }
     public ConventionsOptions Conventions { get; set; }
+    public PublishOptions Publish { get; set; }
     public string SpanContextHeader { get; set; }
     public int MaxProducerChannels { get; set; }
     public bool RequeueFailedMessages { get; set; }
@@ -109,5 +110,11 @@ public class RabbitMqOptions
             public bool IgnoreRoutingKey { get; set; }
             public bool IgnoreQueue { get; set; }
         }
+    }
+
+    public class PublishOptions
+    {
+        public string ContentType { get; set; }
+        public string ContentEncoding { get; set; }
     }
 }

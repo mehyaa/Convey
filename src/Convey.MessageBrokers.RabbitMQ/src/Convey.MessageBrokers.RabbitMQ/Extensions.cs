@@ -77,7 +77,7 @@ public static class Extensions
         }
         else
         {
-            builder.Services.AddSingleton<IRabbitMqSerializer, SystemTextJsonJsonRabbitMqSerializer>();
+            builder.Services.AddSingleton<IRabbitMqSerializer, DefaultRabbitMqSerializer>();
         }
 
         builder.Services.AddSingleton<IRabbitMqPluginsExecutor, RabbitMqPluginsExecutor>();
@@ -219,4 +219,7 @@ public static class Extensions
 
     public static IBusSubscriber UseRabbitMq(this IApplicationBuilder app)
         => app.ApplicationServices.GetRequiredService<IBusSubscriber>();
+    
+    public static IConvention Get<T>(this IConventionProvider conventionProvider)
+        => conventionProvider.Get(typeof(T));
 }
