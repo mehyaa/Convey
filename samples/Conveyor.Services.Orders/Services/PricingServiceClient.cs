@@ -22,7 +22,7 @@ public class PricingServiceClient : IPricingServiceClient
         {
             return;
         }
-            
+
         var certificate = certificatesService.Get(vaultOptions.Pki.RoleName);
         if (certificate is null)
         {

@@ -42,7 +42,7 @@ internal sealed class OutboxProcessor : IHostedService
         _serviceProvider = serviceProvider;
         _publisher = publisher;
         _options = options;
-        _logger = logger;            
+        _logger = logger;
         _interval = TimeSpan.FromMilliseconds(options.IntervalMilliseconds);
         if (options.Enabled)
         {
@@ -110,7 +110,7 @@ internal sealed class OutboxProcessor : IHostedService
         {
             await outbox.ProcessAsync(messages);
         }
-            
+
         stopwatch.Stop();
         _logger.LogTrace($"Processed {messages.Count} outbox messages in {stopwatch.ElapsedMilliseconds} ms [job ID: '{jobId}'].");
     }

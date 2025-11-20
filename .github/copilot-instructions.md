@@ -5,10 +5,10 @@
 **Convey** is a .NET microservices framework that provides a simple recipe for building .NET Core microservices. This is an unofficial fork maintained by mehyaa of the original Convey package (snatch-dev/Convey).
 
 ### Key Information
-- **Language**: C# (.NET 9.0)
+- **Language**: C# (.NET 10.0)
 - **Project Type**: Multi-project solution producing NuGet packages
 - **Size**: 32 library projects + 3 sample applications (35 total projects)
-- **Target Framework**: net9.0 (configured in Directory.Build.props)
+- **Target Framework**: net10.0 (configured in Directory.Build.props)
 - **Repository Structure**: Monorepo with multiple NuGet package projects
 
 ### Purpose
@@ -21,7 +21,7 @@ Convey provides features for quickly setting up microservices including:
 ## Build & Development Setup
 
 ### Prerequisites
-- **.NET SDK**: Version 9.0 or higher (tested with 10.0.100)
+- **.NET SDK**: Version 10.0 or higher (tested with 10.0.100)
 - **Git**: For version control operations
 - **OS**: Linux, macOS, or Windows (CI runs on ubuntu-latest)
 
@@ -224,7 +224,7 @@ dotnet build Convey.sln \
 
 ### Directory.Build.props
 - Defines shared properties for all projects
-- **Target Framework**: net9.0
+- **Target Framework**: net10.0
 - **Authors**: mehyaa, DevMentors.io
 - **License**: MIT
 - **Repository URL**: https://github.com/mehyaa/Convey.git

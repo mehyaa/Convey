@@ -49,7 +49,7 @@ internal sealed class EntityFrameworkMessageOutbox<TContext> : IMessageOutbox, I
         {
             throw new ArgumentException("Message ID to be processed cannot be empty.", nameof(messageId));
         }
-            
+
         _logger.LogTrace($"Received a message with ID: '{messageId}' to be processed.");
         if (await _inboxMessagesSet.AnyAsync(m => m.Id == messageId))
         {

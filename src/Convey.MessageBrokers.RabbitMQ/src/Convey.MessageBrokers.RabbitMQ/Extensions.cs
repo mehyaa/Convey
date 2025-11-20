@@ -219,7 +219,7 @@ public static class Extensions
 
     public static IBusSubscriber UseRabbitMq(this IApplicationBuilder app)
         => app.ApplicationServices.GetRequiredService<IBusSubscriber>();
-    
+
     public static IConvention Get<T>(this IConventionProvider conventionProvider)
         => conventionProvider.Get(typeof(T));
 }

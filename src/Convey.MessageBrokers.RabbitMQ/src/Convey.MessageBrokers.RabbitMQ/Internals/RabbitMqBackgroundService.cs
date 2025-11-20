@@ -129,7 +129,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
     private async Task SubscribeAsync(IMessageSubscriber messageSubscriber)
     {
         var convention = _conventionsProvider.Get(messageSubscriber.Type);
-        
+
         var channelKey = GetChannelKey(convention);
 
         if (_channels.ContainsKey(channelKey))
@@ -255,7 +255,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
                 using var scope = _serviceProvider.CreateScope();
 
                 var scopedServiceProvider = scope.ServiceProvider;
-                
+
                 var cancellationToken = CancellationToken.None;
 
                 var messageId = args.BasicProperties.MessageId;
@@ -405,8 +405,8 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
             catch (Exception ex)
             {
                 _logger.LogError(
-					ex,
-					"Handling a message: {MessageName} with ID: {MessageId}, Correlation ID: {CorrelationId} failed",
+                    ex,
+                    "Handling a message: {MessageName} with ID: {MessageId}, Correlation ID: {CorrelationId} failed",
                     messageName,
                     messageId,
                     correlationId);
@@ -592,7 +592,7 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
         {
             _logger.LogError("RabbitMQ callback exception occured, details: {Details}", details);
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -603,21 +603,21 @@ internal sealed class RabbitMqBackgroundService : BackgroundService, IAsyncDispo
             eventArgs.Initiator,
             eventArgs.ReplyCode,
             eventArgs.ReplyText);
-        
+
         return Task.CompletedTask;
     }
 
     private Task ConnectionOnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs eventArgs)
     {
         _logger.LogError("RabbitMQ connection has been blocked: {Reason}", eventArgs.Reason);
-        
+
         return Task.CompletedTask;
     }
 
     private Task ConnectionOnConnectionUnblockedAsync(object sender, AsyncEventArgs eventArgs)
     {
         _logger.LogInformation("RabbitMQ connection has been unblocked");
-        
+
         return Task.CompletedTask;
     }
 }

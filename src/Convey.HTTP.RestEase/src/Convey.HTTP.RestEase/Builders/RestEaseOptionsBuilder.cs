@@ -7,7 +7,7 @@ internal sealed class RestEaseOptionsBuilder : IRestEaseOptionsBuilder
 {
     private readonly RestEaseOptions _options = new();
     private readonly List<RestEaseOptions.Service> _services = new();
-        
+
     public IRestEaseOptionsBuilder WithLoadBalancer(string loadBalancer)
     {
         _options.LoadBalancer = loadBalancer;
@@ -30,7 +30,7 @@ internal sealed class RestEaseOptionsBuilder : IRestEaseOptionsBuilder
     private class RestEaseServiceBuilder : IRestEaseServiceBuilder
     {
         private readonly RestEaseOptions.Service _service = new();
-            
+
         public IRestEaseServiceBuilder WithName(string name)
         {
             _service.Name = name;

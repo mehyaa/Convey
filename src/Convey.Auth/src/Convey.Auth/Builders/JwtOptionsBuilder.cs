@@ -5,7 +5,7 @@ namespace Convey.Auth.Builders;
 internal sealed class JwtOptionsBuilder : IJwtOptionsBuilder
 {
     private readonly JwtOptions _options = new();
-        
+
     public IJwtOptionsBuilder WithIssuerSigningKey(string issuerSigningKey)
     {
         _options.IssuerSigningKey = issuerSigningKey;
@@ -23,7 +23,7 @@ internal sealed class JwtOptionsBuilder : IJwtOptionsBuilder
         _options.Expiry = expiry;
         return this;
     }
-        
+
     public IJwtOptionsBuilder WithExpiryMinutes(int expiryMinutes)
     {
         _options.ExpiryMinutes = expiryMinutes;

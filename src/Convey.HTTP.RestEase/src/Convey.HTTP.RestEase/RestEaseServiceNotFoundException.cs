@@ -5,7 +5,7 @@ namespace Convey.HTTP.RestEase;
 public class RestEaseServiceNotFoundException : Exception
 {
     public string ServiceName { get; set; }
-        
+
     public RestEaseServiceNotFoundException(string serviceName) : this(string.Empty, serviceName)
     {
     }

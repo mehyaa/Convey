@@ -33,7 +33,7 @@ public static class Pagination
         }
 
         var totalResults = await collection.CountAsync();
-        var totalPages = (int) Math.Ceiling((decimal) totalResults / resultsPerPage);
+        var totalPages = (int)Math.Ceiling((decimal)totalResults / resultsPerPage);
 
         List<T> data;
         if (string.IsNullOrWhiteSpace(orderBy))

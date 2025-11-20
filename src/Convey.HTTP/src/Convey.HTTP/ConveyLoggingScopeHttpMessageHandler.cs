@@ -93,7 +93,7 @@ internal sealed class ConveyLoggingScopeHttpMessageHandler : DelegatingHandler
             {
                 return uri;
             }
-                
+
             var requestUri = uri.OriginalString;
             var hasMatch = false;
             foreach (var part in maskedRequestUrlParts)
@@ -102,12 +102,12 @@ internal sealed class ConveyLoggingScopeHttpMessageHandler : DelegatingHandler
                 {
                     continue;
                 }
-                    
+
                 if (!requestUri.Contains(part))
                 {
                     continue;
                 }
-                    
+
                 requestUri = requestUri.Replace(part, maskTemplate);
                 hasMatch = true;
             }

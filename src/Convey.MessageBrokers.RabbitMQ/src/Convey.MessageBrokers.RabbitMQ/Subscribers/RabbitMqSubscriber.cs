@@ -21,7 +21,7 @@ internal sealed class RabbitMqSubscriber : IBusSubscriber
             MessageSubscriber.Subscribe(
                 type,
                 (serviceProvider, message, context) =>
-                    handle(serviceProvider, (T) message, context)));
+                    handle(serviceProvider, (T)message, context)));
 
         return this;
     }

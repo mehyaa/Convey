@@ -85,7 +85,7 @@ public static class Extensions
                 var keyType = certificate.HasPrivateKey ? "with private key" : "with public key only";
                 Console.WriteLine($"Loaded X.509 certificate from location: '{options.Certificate.Location}' {keyType}.");
             }
-                
+
             if (!string.IsNullOrWhiteSpace(options.Certificate.RawData))
             {
                 var rawData = Convert.FromBase64String(options.Certificate.RawData);

@@ -37,6 +37,6 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult> Post(CreateOrder command)
     {
         await _commandDispatcher.SendAsync(command);
-        return CreatedAtAction(nameof(Get), new {orderId = command.OrderId}, null);
+        return CreatedAtAction(nameof(Get), new { orderId = command.OrderId }, null);
     }
 }

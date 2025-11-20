@@ -74,7 +74,7 @@ public static class Extensions
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 PropertyNameCaseInsensitive = true,
                 NumberHandling = JsonNumberHandling.AllowReadingFromString,
-                Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)}
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
             };
 
             jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
@@ -152,7 +152,7 @@ public static class Extensions
         };
         if (resetKnownNetworksAndProxies)
         {
-            forwardingOptions.KnownNetworks.Clear();
+            forwardingOptions.KnownIPNetworks.Clear();
             forwardingOptions.KnownProxies.Clear();
         }
 
@@ -177,7 +177,7 @@ public static class Extensions
     {
         if (expression.Body is not MemberExpression memberExpression)
         {
-            memberExpression = ((UnaryExpression) expression.Body).Operand as MemberExpression;
+            memberExpression = ((UnaryExpression)expression.Body).Operand as MemberExpression;
         }
 
         if (memberExpression is null)
@@ -223,19 +223,19 @@ public static class Extensions
 
     public static Task Accepted(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.Accepted;
+        response.StatusCode = (int)HttpStatusCode.Accepted;
         return Task.CompletedTask;
     }
 
     public static Task NoContent(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.NoContent;
+        response.StatusCode = (int)HttpStatusCode.NoContent;
         return Task.CompletedTask;
     }
 
     public static Task MovedPermanently(this HttpResponse response, string url)
     {
-        response.StatusCode = (int) HttpStatusCode.MovedPermanently;
+        response.StatusCode = (int)HttpStatusCode.MovedPermanently;
         if (!response.Headers.ContainsKey(LocationHeader))
         {
             response.Headers.Append(LocationHeader, url);
@@ -246,7 +246,7 @@ public static class Extensions
 
     public static Task Redirect(this HttpResponse response, string url)
     {
-        response.StatusCode = (int) HttpStatusCode.PermanentRedirect;
+        response.StatusCode = (int)HttpStatusCode.PermanentRedirect;
         if (!response.Headers.ContainsKey(LocationHeader))
         {
             response.Headers.Append(LocationHeader, url);
@@ -257,31 +257,31 @@ public static class Extensions
 
     public static Task BadRequest(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.BadRequest;
+        response.StatusCode = (int)HttpStatusCode.BadRequest;
         return Task.CompletedTask;
     }
 
     public static Task Unauthorized(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.Unauthorized;
+        response.StatusCode = (int)HttpStatusCode.Unauthorized;
         return Task.CompletedTask;
     }
 
     public static Task Forbidden(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.Forbidden;
+        response.StatusCode = (int)HttpStatusCode.Forbidden;
         return Task.CompletedTask;
     }
 
     public static Task NotFound(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.NotFound;
+        response.StatusCode = (int)HttpStatusCode.NotFound;
         return Task.CompletedTask;
     }
 
     public static Task InternalServerError(this HttpResponse response)
     {
-        response.StatusCode = (int) HttpStatusCode.InternalServerError;
+        response.StatusCode = (int)HttpStatusCode.InternalServerError;
         return Task.CompletedTask;
     }
 
@@ -339,7 +339,7 @@ public static class Extensions
 
             return default;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger?.LogError(ex, "Exception thrown while deserializing request.");
 
@@ -403,7 +403,7 @@ public static class Extensions
 
         if (typeof(T) == typeof(string) && value is string)
         {
-            return (T) value;
+            return (T)value;
         }
 
         var data = value?.ToString();
@@ -412,7 +412,7 @@ public static class Extensions
             return default;
         }
 
-        return (T) TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(data);
+        return (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(data);
     }
 
     private class EmptyExceptionToResponseMapper : IExceptionToResponseMapper

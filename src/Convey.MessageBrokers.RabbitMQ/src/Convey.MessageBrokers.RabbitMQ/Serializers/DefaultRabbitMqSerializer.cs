@@ -25,28 +25,28 @@ public sealed class DefaultRabbitMqSerializer : IRabbitMqSerializer
         where T : class
     {
         ArgumentNullException.ThrowIfNull(value);
-        
+
         ArgumentException.ThrowIfNullOrWhiteSpace(contentType);
-        
+
         if (contentType == "application/json")
         {
             return Task.FromResult(JsonSerializer.SerializeToUtf8Bytes(value, _jsonSerializerOptions));
         }
-        
+
         throw new NotSupportedException($"Content type '{contentType}' is not supported");
     }
 
     public Task<object> DeserializeAsync(byte[] value, Type type, string contentType, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(value);
-        
+
         ArgumentException.ThrowIfNullOrWhiteSpace(contentType);
-        
+
         if (contentType == "application/json")
         {
             return Task.FromResult(JsonSerializer.Deserialize(value, type, _jsonSerializerOptions));
         }
-        
+
         throw new NotSupportedException($"Content type '{contentType}' is not supported");
     }
 }

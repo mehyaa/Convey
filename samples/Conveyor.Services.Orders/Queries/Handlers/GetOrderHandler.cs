@@ -23,6 +23,6 @@ public class GetOrderHandler : IQueryHandler<GetOrder, OrderDto>
 
         return order is null
             ? null
-            : new OrderDto {Id = order.Id, CustomerId = order.CustomerId, TotalAmount = order.TotalAmount};
+            : new OrderDto { Id = order.Id, CustomerId = order.CustomerId, TotalAmount = order.TotalAmount };
     }
 }

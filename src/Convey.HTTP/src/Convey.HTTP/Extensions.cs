@@ -12,7 +12,7 @@ public static class Extensions
 {
     private const string SectionName = "httpClient";
     private const string RegistryName = "http.client";
-    
+
     private const int DefaultTimeoutSeconds = 120;
 
     public static IConveyBuilder AddHttpClient(this IConveyBuilder builder, string clientName = "convey",
@@ -52,7 +52,7 @@ public static class Extensions
         {
             builder.Services.AddSingleton<ICorrelationContextFactory, EmptyCorrelationContextFactory>();
         }
-            
+
         if (registerCorrelationIdFactory)
         {
             builder.Services.AddSingleton<ICorrelationIdFactory, EmptyCorrelationIdFactory>();

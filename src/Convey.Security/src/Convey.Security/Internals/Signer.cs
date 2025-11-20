@@ -14,7 +14,7 @@ internal sealed class Signer : ISigner
         {
             throw new ArgumentNullException(nameof(data), "Data to be signed cannot be null.");
         }
-            
+
         if (certificate is null)
         {
             throw new ArgumentNullException(nameof(certificate), "Certificate cannot be null.");
@@ -75,17 +75,17 @@ internal sealed class Signer : ISigner
         {
             throw new ArgumentNullException(nameof(data), "Data to be verified cannot be null.");
         }
-            
+
         if (signature is null || !signature.Any())
         {
             throw new ArgumentException("Signature cannot be empty.", nameof(signature));
         }
-            
+
         if (certificate is null)
         {
             throw new ArgumentNullException(nameof(certificate), "Certificate cannot be null.");
         }
-            
+
         try
         {
             using var rsa = certificate.GetRSAPublicKey();
@@ -93,7 +93,7 @@ internal sealed class Signer : ISigner
             {
                 throw new InvalidOperationException("RSA public key couldn't be loaded.");
             }
-                
+
             return rsa.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
         catch

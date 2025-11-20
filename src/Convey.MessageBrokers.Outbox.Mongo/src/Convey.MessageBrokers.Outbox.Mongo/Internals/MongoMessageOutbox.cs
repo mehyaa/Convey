@@ -124,7 +124,7 @@ internal sealed class MongoMessageOutbox : IMessageOutbox, IMessageOutboxAccesso
                     ? EmptyJsonObject
                     : JsonSerializer.Serialize(messageContext, SerializerOptions),
             MessageContextType = messageContext?.GetType().AssemblyQualifiedName,
-            Headers = (Dictionary<string, object>) headers,
+            Headers = (Dictionary<string, object>)headers,
             SerializedMessage = message is null
                 ? EmptyJsonObject
                 : JsonSerializer.Serialize(message, SerializerOptions),

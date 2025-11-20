@@ -32,7 +32,7 @@ internal class JsonOutputFormatter : IOutputFormatter
             await context.HttpContext.Response.WriteAsync(json);
             return;
         }
-            
+
         await _serializer.SerializeAsync(context.HttpContext.Response.Body, context.Object);
     }
 }

@@ -73,15 +73,15 @@ public static class Extensions
             .Enrich.WithProperty("Application", appOptions.Service)
             .Enrich.WithProperty("Instance", appOptions.Instance)
             .Enrich.WithProperty("Version", appOptions.Version);
-        
+
         loggerOptions.Tags.ForEach(
             tag =>
                 loggerConfiguration.Enrich.WithProperty(tag.Key, tag.Value));
-        
+
         loggerOptions.MinimumLevelOverrides.ForEach(
             @override =>
                 loggerConfiguration.MinimumLevel.Override(@override.Key, GetLogEventLevel(@override.Value)));
-        
+
         loggerOptions.ExcludePaths.ForEach(
             excludedPath =>
                 loggerConfiguration.Filter.ByExcluding(Matching.WithProperty<string>("RequestPath", n => n.EndsWith(excludedPath))));
@@ -140,7 +140,7 @@ public static class Extensions
                     }
                     else if (elkOptions.ApiKeyAuthEnabled)
                     {
-                        transport.Authentication(new ApiKey(elkOptions.ApiKey)); 
+                        transport.Authentication(new ApiKey(elkOptions.ApiKey));
                     }
                 })
                 .MinimumLevel.ControlledBy(loggingService.LoggingLevelSwitch);

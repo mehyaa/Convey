@@ -1,10 +1,11 @@
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Convey.WebApi.Swagger.Filters;
 
@@ -20,26 +21,26 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
         switch (path)
         {
             case "GET":
-                item.AddOperation(OperationType.Get, new OpenApiOperation());
-                return item.Operations[OperationType.Get];
+                item.AddOperation(HttpMethod.Get, new OpenApiOperation());
+                return item.Operations[HttpMethod.Get];
             case "POST":
-                item.AddOperation(OperationType.Post, new OpenApiOperation());
-                return item.Operations[OperationType.Post];
+                item.AddOperation(HttpMethod.Post, new OpenApiOperation());
+                return item.Operations[HttpMethod.Post];
             case "PUT":
-                item.AddOperation(OperationType.Put, new OpenApiOperation());
-                return item.Operations[OperationType.Put];
+                item.AddOperation(HttpMethod.Put, new OpenApiOperation());
+                return item.Operations[HttpMethod.Put];
             case "DELETE":
-                item.AddOperation(OperationType.Delete, new OpenApiOperation());
-                return item.Operations[OperationType.Delete];
+                item.AddOperation(HttpMethod.Delete, new OpenApiOperation());
+                return item.Operations[HttpMethod.Delete];
             case "HEAD":
-                item.AddOperation(OperationType.Head, new OpenApiOperation());
-                return item.Operations[OperationType.Head];
+                item.AddOperation(HttpMethod.Head, new OpenApiOperation());
+                return item.Operations[HttpMethod.Head];
             case "PATCH":
-                item.AddOperation(OperationType.Patch, new OpenApiOperation());
-                return item.Operations[OperationType.Patch];
+                item.AddOperation(HttpMethod.Patch, new OpenApiOperation());
+                return item.Operations[HttpMethod.Patch];
             case "OPTIONS":
-                item.AddOperation(OperationType.Options, new OpenApiOperation());
-                return item.Operations[OperationType.Options];
+                item.AddOperation(HttpMethod.Options, new OpenApiOperation());
+                return item.Operations[HttpMethod.Options];
         }
 
         return null;
@@ -60,13 +61,13 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
             {
                 var operation = _getOperation(pathItem, methodDefinition.Method);
                 operation.Responses = [];
-                operation.Parameters = new List<OpenApiParameter>();
+                operation.Parameters = [];
 
                 foreach (var parameter in methodDefinition.Parameters)
                 {
                     if (parameter.In is InBody)
                     {
-                        operation.RequestBody = new OpenApiRequestBody()
+                        operation.RequestBody = new OpenApiRequestBody
                         {
                             Content = new Dictionary<string, OpenApiMediaType>()
                             {
@@ -75,8 +76,9 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                     {
                                         Schema = new OpenApiSchema
                                         {
-                                            Type = parameter.Type.Name,
-                                            Example = new OpenApiString(
+                                            Title = parameter.Name,
+                                            Description = parameter.Type.Name,
+                                            Example = JsonNode.Parse(
                                                 JsonSerializer.Serialize(parameter.Example,
                                                     jsonSerializerOptions))
                                         }
@@ -98,8 +100,9 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                         {
                                             Schema = new OpenApiSchema
                                             {
-                                                Type = parameter.Type.Name,
-                                                Example = new OpenApiString(
+                                                Title = parameter.Name,
+                                                Description = parameter.Type.Name,
+                                                Example = JsonNode.Parse(
                                                     JsonSerializer.Serialize(parameter.Example,
                                                         jsonSerializerOptions))
                                             }
@@ -115,8 +118,9 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                 Name = parameter.Name,
                                 Schema = new OpenApiSchema
                                 {
-                                    Type = parameter.Type.Name,
-                                    Example = new OpenApiString(
+                                    Title = parameter.Name,
+                                    Description = parameter.Type.Name,
+                                    Example = JsonNode.Parse(
                                         JsonSerializer.Serialize(parameter.Example,
                                             jsonSerializerOptions))
                                 }
@@ -136,8 +140,8 @@ internal sealed class WebApiDocumentFilter : IDocumentFilter
                                 {
                                     Schema = new OpenApiSchema
                                     {
-                                        Type = response.Type?.Name,
-                                        Example = new OpenApiString(
+                                        Title = response.Type.Name,
+                                        Example = JsonNode.Parse(
                                             JsonSerializer.Serialize(response.Example,
                                                 jsonSerializerOptions))
                                     }

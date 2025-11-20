@@ -25,7 +25,7 @@ internal class OcsClient : IOcsClient
     };
     private readonly IRequestHandler _requestHandler;
     private readonly OcsOptions _ocsOptions;
-       
+
     private OcsClient() { }
     public OcsClient(IRequestHandler requestHandler, OcsOptions ocsOptions)
     {

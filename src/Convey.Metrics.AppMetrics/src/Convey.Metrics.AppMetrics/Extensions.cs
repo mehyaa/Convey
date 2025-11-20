@@ -73,7 +73,7 @@ public static class Extensions
         //TODO: Remove once fixed https://github.com/AppMetrics/AppMetrics/issues/396
         builder.Services.Configure<KestrelServerOptions>(o => o.AllowSynchronousIO = true);
         builder.Services.Configure<IISServerOptions>(o => o.AllowSynchronousIO = true);
-            
+
         var metricsBuilder = new MetricsBuilder().Configuration.Configure(cfg =>
         {
             var tags = metricsOptions.Tags;

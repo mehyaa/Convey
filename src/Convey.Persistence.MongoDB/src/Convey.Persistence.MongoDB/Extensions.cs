@@ -83,7 +83,7 @@ public static class Extensions
             }
 
             var settings = MongoClientSettings.FromUrl(new MongoUrl(mongoOptions.ConnectionString));
-            
+
             settings.LoggingSettings = new LoggingSettings(loggerFactory);
 
             return new MongoClient(settings);

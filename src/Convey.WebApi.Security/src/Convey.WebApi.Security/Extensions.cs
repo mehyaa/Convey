@@ -34,7 +34,7 @@ public static class Extensions
         {
             builder.Services.AddSingleton<ICertificatePermissionValidator, DefaultCertificatePermissionValidator>();
         }
-            
+
         builder.Services.AddSingleton<CertificateMiddleware>();
         builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
             .AddCertificate();

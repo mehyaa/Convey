@@ -5,7 +5,7 @@ namespace Convey.Secrets.Vault;
 internal sealed class VaultException : Exception
 {
     public string Key { get; }
-        
+
     public VaultException(string key) : this(null, key)
     {
     }

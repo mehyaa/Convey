@@ -15,7 +15,7 @@ public class EndpointsBuilder : IEndpointsBuilder
     private const string Body = "body";
 
     private static readonly string[] HeadMethod = ["HEAD"];
-    
+
     private readonly WebApiEndpointDefinitions _definitions;
     private readonly IEndpointRouteBuilder _routeBuilder;
 
@@ -34,9 +34,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         params string[] policies)
     {
         var builder = _routeBuilder.MapGet(path, ctx => context?.Invoke(ctx) ?? Task.CompletedTask);
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition(HttpMethods.Get, path);
 
@@ -53,9 +53,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapGet(path, ctx => BuildQueryContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest>(HttpMethods.Get, path);
 
@@ -72,9 +72,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapGet(path, ctx => BuildQueryContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest, TResult>(HttpMethods.Get, path);
 
@@ -90,9 +90,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         params string[] policies)
     {
         var builder = _routeBuilder.MapMethods(path, HeadMethod, ctx => context?.Invoke(ctx) ?? Task.CompletedTask);
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition(HttpMethods.Head, path);
 
@@ -109,9 +109,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapMethods(path, HeadMethod, ctx => BuildQueryContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest>(HttpMethods.Head, path);
 
@@ -127,9 +127,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         params string[] policies)
     {
         var builder = _routeBuilder.MapPost(path, ctx => context?.Invoke(ctx) ?? Task.CompletedTask);
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition(HttpMethods.Post, path);
 
@@ -146,9 +146,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapPost(path, ctx => BuildRequestContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest>(HttpMethods.Post, path);
 
@@ -164,9 +164,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         params string[] policies)
     {
         var builder = _routeBuilder.MapPut(path, ctx => context?.Invoke(ctx) ?? Task.CompletedTask);
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition(HttpMethods.Put, path);
 
@@ -183,9 +183,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapPut(path, ctx => BuildRequestContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest>(HttpMethods.Put, path);
 
@@ -201,9 +201,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         params string[] policies)
     {
         var builder = _routeBuilder.MapPatch(path, ctx => context?.Invoke(ctx) ?? Task.CompletedTask);
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition(HttpMethods.Patch, path);
 
@@ -220,9 +220,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapPatch(path, ctx => BuildRequestContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest>(HttpMethods.Patch, path);
 
@@ -238,9 +238,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         params string[] policies)
     {
         var builder = _routeBuilder.MapDelete(path, ctx => context?.Invoke(ctx) ?? Task.CompletedTask);
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition(HttpMethods.Delete, path);
 
@@ -257,9 +257,9 @@ public class EndpointsBuilder : IEndpointsBuilder
         where TRequest : class
     {
         var builder = _routeBuilder.MapDelete(path, ctx => BuildQueryContext(ctx, context));
-        
+
         endpoint?.Invoke(builder);
-        
+
         ApplyAuthRolesAndPolicies(builder, auth, roles, policies);
         AddEndpointDefinition<TRequest>(HttpMethods.Delete, path);
 
