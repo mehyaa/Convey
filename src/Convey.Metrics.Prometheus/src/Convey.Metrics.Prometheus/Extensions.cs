@@ -32,13 +32,24 @@ public static class Extensions
             return app;
         }
 
-        var endpoint = string.IsNullOrWhiteSpace(options.Endpoint) ? "/metrics" :
-            options.Endpoint.StartsWith("/") ? options.Endpoint : $"/{options.Endpoint}";
+        var endpoint = options.BuildMetricEndpointPath();
 
         return app
             .UseMiddleware<PrometheusMiddleware>()
             .UseHttpMetrics()
             .UseGrpcMetrics()
             .UseMetricServer(endpoint);
+    }
+
+    private static string BuildMetricEndpointPath(this PrometheusOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(options.Endpoint))
+        {
+            return "/metrics";
+        }
+
+        return options.Endpoint.StartsWith('/')
+            ? options.Endpoint
+            : $"/{options.Endpoint}";
     }
 }

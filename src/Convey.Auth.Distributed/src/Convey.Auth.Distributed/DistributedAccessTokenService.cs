@@ -44,7 +44,7 @@ internal sealed class DistributedAccessTokenService : IAccessTokenService
 
         return authorizationHeader == StringValues.Empty
             ? string.Empty
-            : authorizationHeader.Single().Split(' ').Last();
+            : authorizationHeader.Single().Split(' ')[^1];
     }
 
     private static string GetKey(string token) => $"blacklisted-tokens:{token}";
