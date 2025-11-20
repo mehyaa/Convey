@@ -217,7 +217,7 @@ dotnet build Convey.sln \
 - **Internal/ subdirectory**: Internal implementation classes
 
 ### Code Notes
-- **TODO in Convey.Persistence.OpenStack.OCS**: HttpRequestBuilder.cs line 30 - regex for multiple '/' cleanup
+- **TODO in Convey.Persistence.OpenStack.OCS**: HttpRequestBuilder.cs line 34 - regex for multiple '/' cleanup
 - **TODO in Convey.Metrics.AppMetrics**: Extensions.cs - workaround for AppMetrics issue #396
 
 ## Configuration Files
