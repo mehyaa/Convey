@@ -193,7 +193,7 @@ public static class Extensions
 
             if (!string.IsNullOrEmpty(azureOptions.InstrumentationKey))
             {
-                telemetryConfiguration.InstrumentationKey = azureOptions.InstrumentationKey;
+                telemetryConfiguration.ConnectionString = azureOptions.InstrumentationKey;
             }
 
             switch (azureOptions.LogType)
