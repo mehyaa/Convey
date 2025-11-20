@@ -27,8 +27,7 @@ internal class ServiceId : IServiceId
 
             if (IsInDocker())
             {
-                // Environment.MachineName -> Container ID
-                _id = $"{_appOptions.Service}:{Environment.MachineName}";
+                _id = $"{_appOptions.Service}:{GetDockerContainerId()}";
             }
             else
             {
@@ -39,6 +38,10 @@ internal class ServiceId : IServiceId
         }
     }
 
+    private static bool IsInDocker() => Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+    private static string GetDockerContainerId() => Environment.MachineName;
+
     private static string GetHostIpAddress()
     {
         var ip =
@@ -46,11 +49,6 @@ internal class ServiceId : IServiceId
                 Dns.GetHostEntry(Dns.GetHostName()).AddressList,
                 i => i.AddressFamily == AddressFamily.InterNetwork);
 
-        return ip?.ToString() ?? throw new ArgumentException("IP address not found");
-    }
-
-    private static bool IsInDocker()
-    {
-        return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        return ip?.ToString() ?? throw new OperationCanceledException("IP address not found");
     }
 }

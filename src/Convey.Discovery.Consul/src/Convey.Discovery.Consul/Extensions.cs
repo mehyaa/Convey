@@ -18,7 +18,6 @@ public static class Extensions
     private const string SectionName = "consul";
 
     private const string DefaultInterval = "5s";
-    
     private const int DefaultTimeoutSeconds = 120;
 
     public static IConveyBuilder AddConsul(
@@ -62,7 +61,7 @@ public static class Extensions
 
         if (!enabled)
         {
-            return null;
+            return builder;
         }
 
         if (!builder.TryRegister(RegistryName))
@@ -145,9 +144,7 @@ public static class Extensions
             Address =
                 options.UseAddress
                     ? options.Address
-                    : IsInDocker()
-                        ? GetDockerContainerId()
-                        : GetHostIpAddress(),
+                    : GetContainerIdOrHostIp(),
             Port = options.Port,
             Tags = options.Tags,
             Meta = options.Meta,
@@ -157,17 +154,7 @@ public static class Extensions
 
         if (options.PingEnabled)
         {
-            var pingEndpoint =
-                string.IsNullOrWhiteSpace(options.PingEndpoint)
-                    ? string.Empty
-                    : options.PingEndpoint.StartsWith('/')
-                        ? options.PingEndpoint
-                        : $"/{options.PingEndpoint}";
-
-            if (pingEndpoint.EndsWith('/'))
-            {
-                pingEndpoint = pingEndpoint.Substring(0, pingEndpoint.Length - 1);
-            }
+            var pingEndpoint = NormalizePath(options.PingEndpoint);
 
             var scheme =
                 options.Address.StartsWith("http", StringComparison.InvariantCultureIgnoreCase)
@@ -186,7 +173,7 @@ public static class Extensions
                 DeregisterCriticalServiceAfter = ParseTime(options.RemoveAfterInterval)
             };
 
-            registration.Checks = new[] { check };
+            registration.Checks = [ check ];
         }
         else if (options.TtlEnabled)
         {
@@ -200,7 +187,7 @@ public static class Extensions
                 DeregisterCriticalServiceAfter = ParseTime(options.RemoveAfterInterval)
             };
 
-            registration.Checks = new[] { check };
+            registration.Checks = [ check ];
         }
 
         return registration;
@@ -216,15 +203,28 @@ public static class Extensions
         return int.TryParse(value, out var number) ? $"{number}s" : value;
     }
 
-    private static bool IsInDocker()
+    private static string NormalizePath(string path)
     {
-        return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        path = path.StartsWith('/') ? path : $"/{path}";
+
+        if (path.EndsWith('/'))
+        {
+            path = path[..^1];
+        }
+
+        return path;
     }
 
-    private static string GetDockerContainerId()
-    {
-        return Environment.MachineName;
-    }
+    private static string GetContainerIdOrHostIp() => IsInDocker() ? GetDockerContainerId() : GetHostIpAddress();
+
+    private static bool IsInDocker() => Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+    private static string GetDockerContainerId() => Environment.MachineName;
 
     private static string GetHostIpAddress()
     {
