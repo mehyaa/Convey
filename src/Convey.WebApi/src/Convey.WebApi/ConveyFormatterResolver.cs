@@ -11,8 +11,7 @@ internal sealed class ConveyFormatterResolver : IJsonFormatterResolver
 
     private static readonly IJsonFormatterResolver[] Resolvers =
     {
-        StandardResolver.AllowPrivateCamelCase,
-            
+        StandardResolver.AllowPrivateCamelCase
     };
 
     public IJsonFormatter<T> GetFormatter<T>()
@@ -33,9 +32,11 @@ internal sealed class ConveyFormatterResolver : IJsonFormatterResolver
                 foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
                 {
                     var ti = implInterface.GetTypeInfo();
+
                     if (ti.IsGenericType && ti.GenericTypeArguments[0] == typeof(T))
                     {
-                        Formatter = (IJsonFormatter<T>) item;
+                        Formatter = (IJsonFormatter<T>)item;
+
                         return;
                     }
                 }
@@ -44,12 +45,14 @@ internal sealed class ConveyFormatterResolver : IJsonFormatterResolver
             foreach (var item in Resolvers)
             {
                 var formatter = item.GetFormatter<T>();
+
                 if (formatter is null)
                 {
                     continue;
                 }
 
                 Formatter = formatter;
+
                 return;
             }
         }

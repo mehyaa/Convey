@@ -24,7 +24,7 @@ public static class Extensions
         {
             sectionName = SectionName;
         }
-            
+
         var restEaseOptions = builder.GetOptions<RestEaseOptions>(sectionName);
         return builder.AddServiceClient<T>(serviceName, restEaseOptions,
             b => b.AddFabio(fabioSectionName, consulSectionName, httpClientSectionName));
@@ -49,7 +49,7 @@ public static class Extensions
         => builder.AddServiceClient<T>(serviceName, options,
             b => b.AddFabio(fabioOptions, consulOptions, httpClientOptions));
 
-    private static IConveyBuilder AddServiceClient<T>(this IConveyBuilder builder, string serviceName, 
+    private static IConveyBuilder AddServiceClient<T>(this IConveyBuilder builder, string serviceName,
         RestEaseOptions options, Action<IConveyBuilder> registerFabio)
         where T : class
     {
@@ -57,9 +57,9 @@ public static class Extensions
         {
             return builder;
         }
-            
+
         var clientName = typeof(T).ToString();
-            
+
         switch (options.LoadBalancer?.ToLowerInvariant())
         {
             case "consul":

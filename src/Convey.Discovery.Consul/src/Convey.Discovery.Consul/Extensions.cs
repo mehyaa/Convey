@@ -173,7 +173,7 @@ public static class Extensions
                 DeregisterCriticalServiceAfter = ParseTime(options.RemoveAfterInterval)
             };
 
-            registration.Checks = [ check ];
+            registration.Checks = [check];
         }
         else if (options.TtlEnabled)
         {
@@ -187,7 +187,7 @@ public static class Extensions
                 DeregisterCriticalServiceAfter = ParseTime(options.RemoveAfterInterval)
             };
 
-            registration.Checks = [ check ];
+            registration.Checks = [check];
         }
 
         return registration;

@@ -6,7 +6,7 @@ public class FailedMessage
 {
     public object Message { get; }
     public bool ShouldRetry { get; }
-        
+
     [Description("This will only work if 'deadLetter' is enabled in RabbitMQ options." +
                  "For more information, see https://www.rabbitmq.com/dlx.html")]
     public bool MoveToDeadLetter { get; }

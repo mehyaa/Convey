@@ -27,7 +27,7 @@ internal sealed class Hasher : IHasher
         }
 
         using var sha256Hash = SHA256.Create();
-            
+
         return sha256Hash.ComputeHash(data);
     }
 }

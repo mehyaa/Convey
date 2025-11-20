@@ -34,6 +34,6 @@ public class AccessTokenValidatorMiddleware : IMiddleware
             return;
         }
 
-        context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+        context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
     }
 }

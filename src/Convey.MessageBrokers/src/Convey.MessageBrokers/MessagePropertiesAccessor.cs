@@ -20,12 +20,12 @@ public class MessagePropertiesAccessor : IMessagePropertiesAccessor
 
             if (value != null)
             {
-                Holder.Value = new MessageContextHolder {Properties = value};
+                Holder.Value = new MessageContextHolder { Properties = value };
             }
         }
     }
 
-    private class MessageContextHolder
+    private sealed class MessageContextHolder
     {
         public IMessageProperties Properties;
     }

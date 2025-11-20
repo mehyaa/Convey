@@ -49,7 +49,7 @@ internal class JsonInputFormatter : IInputFormatter
             json = EmptyJson;
         }
 
-        var result = method.Invoke(_serializer, new object[] {json});
+        var result = method.Invoke(_serializer, [json]);
 
         return await InputFormatterResult.SuccessAsync(result);
     }

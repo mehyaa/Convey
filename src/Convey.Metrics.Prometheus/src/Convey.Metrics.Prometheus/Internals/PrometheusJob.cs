@@ -34,7 +34,7 @@ internal sealed class PrometheusJob : IHostedService
                 .WithExceptionStats()
                 .StartCollecting();
         }
-            
+
         return Task.CompletedTask;
     }
 

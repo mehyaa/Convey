@@ -16,7 +16,7 @@ public static class Extensions
 {
     private const string RegistryName = "loadBalancing.fabio";
     private const string SectionName = "fabio";
-    
+
     private const int DefaultTimeoutSeconds = 120;
 
     public static IConveyBuilder AddFabio(

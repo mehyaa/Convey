@@ -28,15 +28,15 @@ public static class Extensions
             .GetTypes()
             .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerType))
             .ToList();
-            
+
         handlers.ForEach(ch => GetExtensionMethods()
             .FirstOrDefault(mi => !mi.IsGenericMethod && mi.Name == "TryDecorate")?
-            .Invoke(builder.Services, new object[]
-            {
+            .Invoke(builder.Services,
+            [
                 builder.Services,
                 ch.GetInterfaces().FirstOrDefault(),
-                decoratorType.MakeGenericType(ch.GetInterfaces().FirstOrDefault()?.GenericTypeArguments.First())
-            }));
+                decoratorType.MakeGenericType(ch.GetInterfaces().FirstOrDefault()?.GenericTypeArguments[0])
+            ]));
 
         return builder;
     }
@@ -45,12 +45,14 @@ public static class Extensions
     {
         var types = typeof(ReplacementBehavior).Assembly.GetTypes();
 
-        var query = from type in types
+        var query =
+            from type in types
             where type.IsSealed && !type.IsGenericType && !type.IsNested
             from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
             where method.IsDefined(typeof(ExtensionAttribute), false)
             where method.GetParameters()[0].ParameterType == typeof(IServiceCollection)
             select method;
+
         return query;
     }
 }

@@ -17,7 +17,7 @@ public class SystemTextJsonHttpClientSerializer : IHttpClientSerializer
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)}
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
     }
 

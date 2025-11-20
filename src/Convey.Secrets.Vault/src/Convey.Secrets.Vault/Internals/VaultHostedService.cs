@@ -44,8 +44,10 @@ internal sealed class VaultHostedService : BackgroundService
             return;
         }
 
-        _logger.LogInformation($"Vault lease renewals will be processed every {_interval} s.");
+        _logger.LogInformation("Vault lease renewals will be processed every {Interval}s.", _interval);
+
         var interval = TimeSpan.FromSeconds(_interval);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.UtcNow;
@@ -60,8 +62,10 @@ internal sealed class VaultHostedService : BackgroundService
                         continue;
                     }
 
-                    _logger.LogInformation($"Issuing a certificate for: '{role}'.");
+                    _logger.LogInformation("Issuing a certificate for: '{Role}'.", role);
+
                     var certificate = await _certificatesIssuer.IssueAsync();
+
                     _certificatesService.Set(role, certificate);
                 }
             }
@@ -73,11 +77,15 @@ internal sealed class VaultHostedService : BackgroundService
                     continue;
                 }
 
-                _logger.LogInformation($"Renewing a lease with ID: '{lease.Id}', for: '{key}', " +
-                                       $"duration: {lease.Duration} s.");
-                    
+                _logger.LogInformation(
+                    "Renewing a lease with ID: '{LeaseId}', for: '{Key}', duration: {Duration} s.",
+                    lease.Id,
+                    key,
+                    lease.Duration);
+
                 var beforeRenew = DateTime.UtcNow;
                 var renewedLease = await _client.V1.System.RenewLeaseAsync(lease.Id, lease.Duration);
+
                 lease.Refresh(renewedLease.LeaseDurationSeconds - (lease.ExpiryAt - beforeRenew).TotalSeconds);
             }
 
@@ -91,7 +99,8 @@ internal sealed class VaultHostedService : BackgroundService
 
         foreach (var (key, lease) in _leaseService.All)
         {
-            _logger.LogInformation($"Revoking a lease with ID: '{lease.Id}', for: '{key}'.");
+            _logger.LogInformation("Revoking a lease with ID: '{LeaseId}', for: '{Key}'.", lease.Id, key);
+
             await _client.V1.System.RevokeLeaseAsync(lease.Id);
         }
     }

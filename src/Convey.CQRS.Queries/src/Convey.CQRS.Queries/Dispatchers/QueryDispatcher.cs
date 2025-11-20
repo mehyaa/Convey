@@ -20,9 +20,9 @@ internal sealed class QueryDispatcher : IQueryDispatcher
         var handlerType = typeof(IQueryHandler<,>).MakeGenericType(query.GetType(), typeof(TResult));
         var handler = scope.ServiceProvider.GetRequiredService(handlerType);
         // ReSharper disable once PossibleNullReferenceException
-        return await (Task<TResult>) handlerType
-            .GetMethod(nameof(IQueryHandler<IQuery<TResult>, TResult>.HandleAsync))?
-            .Invoke(handler, new object[] {query, cancellationToken});
+        return await (Task<TResult>)handlerType
+            .GetMethod(nameof(IQueryHandler<,>.HandleAsync))?
+            .Invoke(handler, [query, cancellationToken]);
     }
 
     public async Task<TResult> QueryAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken = default)

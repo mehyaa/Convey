@@ -8,7 +8,7 @@ namespace Convey.MessageBrokers.RabbitMQ;
 public abstract class RabbitMqPlugin : IRabbitMqPlugin, IRabbitMqPluginAccessor
 {
     private Func<object, object, BasicDeliverEventArgs, Task> _successor;
-        
+
     public abstract Task HandleAsync(object message, object correlationContext,
         BasicDeliverEventArgs args);
 

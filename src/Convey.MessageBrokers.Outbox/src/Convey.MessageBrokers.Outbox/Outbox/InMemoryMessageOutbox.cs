@@ -78,7 +78,7 @@ internal sealed class InMemoryMessageOutbox : IMessageOutbox, IMessageOutboxAcce
             CorrelationId = correlationId,
             SpanContext = spanContext,
             MessageContextType = messageContext?.GetType().AssemblyQualifiedName,
-            Headers = (Dictionary<string, object>) headers,
+            Headers = (Dictionary<string, object>)headers,
             Message = message,
             MessageContext = messageContext,
             MessageType = message?.GetType().AssemblyQualifiedName,
@@ -101,15 +101,15 @@ internal sealed class InMemoryMessageOutbox : IMessageOutbox, IMessageOutboxAcce
             message.ProcessedAt = DateTime.UtcNow;
         }
         RemoveExpiredMessages();
-            
+
         return Task.CompletedTask;
     }
-        
+
     Task IMessageOutboxAccessor.ProcessAsync(OutboxMessage message)
     {
         message.ProcessedAt = DateTime.UtcNow;
         RemoveExpiredMessages();
-            
+
         return Task.CompletedTask;
     }
 
@@ -119,7 +119,7 @@ internal sealed class InMemoryMessageOutbox : IMessageOutbox, IMessageOutboxAcce
         {
             return;
         }
-            
+
         foreach (var (id, message) in _outboxMessages)
         {
             if (!message.ProcessedAt.HasValue)
@@ -131,7 +131,7 @@ internal sealed class InMemoryMessageOutbox : IMessageOutbox, IMessageOutboxAcce
             {
                 continue;
             }
-                
+
             _outboxMessages.TryRemove(id, out _);
             _inboxMessages.TryRemove(message.OriginatedMessageId, out _);
         }

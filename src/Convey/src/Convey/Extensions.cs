@@ -1,4 +1,5 @@
 using Convey.Types;
+using Figgle.Fonts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -38,7 +39,7 @@ public static class Extensions
 
         var version = options.DisplayVersion ? $" {options.Version}" : string.Empty;
 
-        Console.WriteLine(Figgle.FiggleFonts.Doom.Render($"{options.Name}{version}"));
+        Console.WriteLine(FiggleFonts.Doom.Render($"{options.Name}{version}"));
 
         return builder;
     }

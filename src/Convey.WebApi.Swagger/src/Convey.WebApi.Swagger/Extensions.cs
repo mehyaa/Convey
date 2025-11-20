@@ -18,14 +18,14 @@ public static class Extensions
 
         return builder.AddWebApiSwaggerDocs(b => b.AddSwaggerDocs(sectionName));
     }
-        
-    public static IConveyBuilder AddWebApiSwaggerDocs(this IConveyBuilder builder, 
+
+    public static IConveyBuilder AddWebApiSwaggerDocs(this IConveyBuilder builder,
         Func<ISwaggerOptionsBuilder, ISwaggerOptionsBuilder> buildOptions)
         => builder.AddWebApiSwaggerDocs(b => b.AddSwaggerDocs(buildOptions));
-        
+
     public static IConveyBuilder AddWebApiSwaggerDocs(this IConveyBuilder builder, SwaggerOptions options)
         => builder.AddWebApiSwaggerDocs(b => b.AddSwaggerDocs(options));
-        
+
     private static IConveyBuilder AddWebApiSwaggerDocs(this IConveyBuilder builder, Action<IConveyBuilder> registerSwagger)
     {
         registerSwagger(builder);

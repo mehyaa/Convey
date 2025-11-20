@@ -19,7 +19,7 @@ public static class Extensions
         builder.Services.AddSingleton<IDispatcher, InMemoryDispatcher>();
         return builder;
     }
-        
+
     public static IApplicationBuilder UseDispatcherEndpoints(this IApplicationBuilder app,
         Action<IDispatcherEndpointsBuilder> builder, bool useAuthorization = true,
         Action<IApplicationBuilder> middleware = null)
@@ -32,7 +32,7 @@ public static class Extensions
         }
 
         middleware?.Invoke(app);
-            
+
         app.UseEndpoints(router => builder(new DispatcherEndpointsBuilder(
             new EndpointsBuilder(router, definitions))));
 
