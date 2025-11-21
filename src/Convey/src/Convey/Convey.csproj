@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">true</GeneratePackageOnBuild>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Figgle.Fonts" Version="0.6.5" />
     <PackageReference Include="Scrutor" Version="6.1.0" />

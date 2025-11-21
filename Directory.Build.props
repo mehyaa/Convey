@@ -2,43 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
-    <Authors>mehyaa,DevMentors.io</Authors>
-    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <PackageId>$(MSBuildProjectName)</PackageId>
-    <Product>$(MSBuildProjectName)</Product>
-    <Description>Unofficial release of original $(MSBuildProjectName) package (https://www.nuget.org/packages/$(MSBuildProjectName)) forked from the official GitHub repo (https://github.com/snatch-dev/Convey.git)</Description>
-    <Title>$(MSBuildProjectName)</Title>
-    <PackageTags>$(MSBuildProjectName)</PackageTags>
-    <RepositoryUrl>https://github.com/mehyaa/Convey.git</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/mehyaa/Convey.git</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IsPackable>false</IsPackable>
     <GenerateLocalPackages>false</GenerateLocalPackages>
   </PropertyGroup>
-
-  <ItemGroup>
-    <SourceRoot Include="$(MSBuildThisFileDirectory)/"/>
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(GenerateLocalPackages)'=='true'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.0-local</Version>
-    <PackageTarget>convey</PackageTarget>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(SourceLinkCreate)'=='true'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(SourceLinkCreate)'=='true'">
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedAllSources>true</EmbedAllSources>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-  </PropertyGroup>
-
-  <Target Name="CopyToLocalNugetSource" AfterTargets="Pack" Condition="'$(GenerateLocalPackages)'=='true'">
-    <MakeDir Directories="$(UserProfile)\\.nuget\\$(PackageTarget)" Condition="!Exists('$(UserProfile)\\.nuget\\$(PackageTarget)')" />
-    <Exec Command="dotnet nuget push $(OutputPath)..\$(PackageId).$(Version).nupkg --source $(UserProfile)\\.nuget\\$(PackageTarget)\" />
-    <Exec Command="rmdir /q /s $(UserProfile)\\.nuget\\packages\\$(MSBuildProjectName.ToLower())\\$(Version)\" />
-  </Target>
-
 </Project>

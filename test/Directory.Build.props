@@ -1,0 +1,36 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS8604;CS8602;CS8600;CS8618</NoWarn>
+    <WarningsAsErrors>false</WarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura</CoverletOutputFormat>
+    <CoverletOutput>$(OutputPath)coverage/</CoverletOutput>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SourceProjectName>$(MSBuildProjectName.Replace('.Tests', ''))</SourceProjectName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference
+      Include="..\..\src\$(SourceProjectName)\src\$(SourceProjectName)\$(SourceProjectName).csproj"
+      Condition="Exists('..\..\src\$(SourceProjectName)\src\$(SourceProjectName)\$(SourceProjectName).csproj')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
