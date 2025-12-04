@@ -3,7 +3,7 @@
 > A lightweight, modular toolkit for rapidly building production-ready .NET (Core) microservices.
 
 ## Documentation & Demo
-Read the full docs at **[convey-stack.github.io](https://convey-stack.github.io)** or watch a short demo **[on YouTube](https://www.youtube.com/watch?v=cxEXx4UT1FI)**.
+Read the full docs at **[mehyaa.github.io/Convey](https://mehyaa.github.io/Convey)** or watch a short demo **[on YouTube](https://www.youtube.com/watch?v=cxEXx4UT1FI)**.
 
 You can also find detailed documentation in the [docs/](docs/) directory.
 
