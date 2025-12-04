@@ -21,31 +21,30 @@ internal sealed class DistributedAccessTokenService : IAccessTokenService
         _expires = jwtOptions.Expiry ?? TimeSpan.FromMinutes(jwtOptions.ExpiryMinutes);
     }
 
-    public Task<bool> IsCurrentActiveToken()
-        => IsActiveAsync(GetCurrentAsync());
+    public Task<bool> IsTokenActiveAsync()
+        => IsTokenActiveAsync(GetCurrent());
 
-    public Task DeactivateCurrentAsync()
-        => DeactivateAsync(GetCurrentAsync());
-
-    public async Task<bool> IsActiveAsync(string token)
+    public async Task<bool> IsTokenActiveAsync(string token)
         => string.IsNullOrWhiteSpace(await _cache.GetStringAsync(GetKey(token)));
 
-    public Task DeactivateAsync(string token)
+    public Task DeactivateTokenAsync()
+        => DeactivateTokenAsync(GetCurrent());
+
+    public Task DeactivateTokenAsync(string token)
         => _cache.SetStringAsync(GetKey(token),
             "revoked", new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = _expires
             });
 
-    private string GetCurrentAsync()
+    private static string GetKey(string token) => $"blacklisted-tokens:{token}";
+
+    private string GetCurrent()
     {
-        var authorizationHeader = _httpContextAccessor
-            .HttpContext.Request.Headers["authorization"];
+        var authorizationHeader = _httpContextAccessor.HttpContext.Request.Headers.Authorization;
 
         return authorizationHeader == StringValues.Empty
             ? string.Empty
             : authorizationHeader.Single().Split(' ')[^1];
     }
-
-    private static string GetKey(string token) => $"blacklisted-tokens:{token}";
 }
