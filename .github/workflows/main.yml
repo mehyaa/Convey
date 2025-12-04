@@ -31,7 +31,7 @@ jobs:
       packages: write
 
     env:
-      SOLUTION: "Convey.sln"
+      SOLUTION: "Convey.slnx"
       BUILD_CONFIG: "Release"
       PACKAGE_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
