@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    paths:
+      - src/**/*
+      - Directory.Build.props
   pull_request:
     branches:
       - master
