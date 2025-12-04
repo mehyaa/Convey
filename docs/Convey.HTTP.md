@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.HTTP
+parent: HTTP & API
+---
 # Convey.HTTP
 
 HTTP client abstractions and integrations providing service discovery-aware HTTP clients, automatic retries, circuit breakers, and comprehensive request/response handling for microservices communication.
@@ -903,3 +908,4 @@ public static class ConveyExtensions
    - Check failure threshold configuration
    - Verify exception handling in policies
    - Monitor service health metrics
+

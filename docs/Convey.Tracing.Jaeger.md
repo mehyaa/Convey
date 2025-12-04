@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Tracing.Jaeger
+parent: Observability
+---
 # Convey.Tracing.Jaeger
 
 Distributed tracing integration with Jaeger providing comprehensive request tracing, performance monitoring, and debugging capabilities for microservices architectures.
@@ -879,3 +884,4 @@ public static class ConveyExtensions
    - Check for exceptions that terminate spans early
    - Verify proper span disposal with using statements
    - Ensure child spans are properly linked to parents
+

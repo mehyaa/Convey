@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.WebApi
+parent: Foundation
+---
 # Convey.WebApi
 
 Provides Web API extensions and minimal routing capabilities for building RESTful APIs with ASP.NET Core. Offers a fluent API for defining endpoints with built-in request/response handling.
@@ -532,3 +537,4 @@ app.UseEndpoints(endpoints =>
    - Check route patterns for conflicts
    - Use constraints for route parameters
    - Order specific routes before generic ones
+

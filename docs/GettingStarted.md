@@ -1,3 +1,8 @@
+---
+layout: default
+title: GettingStarted
+parent: Home
+---
 # Getting Started with Convey
 
 This guide shows a practical end‑to‑end setup of a microservice using Convey’s modular packages. You can copy snippets directly or adapt them to existing solutions.
@@ -638,3 +643,4 @@ public class UserCreatedEventHandler : IEventHandler<UserCreatedEvent>
 
 ---
 This guide provides a solid foundation. For style & conventions see [`STYLEGUIDE.md`](./STYLEGUIDE.md). Consider adding metrics, tracing and structured logging early for production readiness.
+

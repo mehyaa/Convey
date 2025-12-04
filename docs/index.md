@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+nav_order: 1
+---
+
 # Convey Documentation
 
 Convey is a modular toolkit for building resilient, observable .NET microservices. Each package is optional and focused; compose only what you need.

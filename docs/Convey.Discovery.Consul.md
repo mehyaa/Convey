@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Discovery.Consul
+parent: Service Discovery & Load Balancing
+---
 # Convey.Discovery.Consul
 
 Service discovery integration with HashiCorp Consul providing automatic service registration, health checking, load balancing, and dynamic service resolution for microservices architectures.
@@ -821,3 +826,4 @@ public static class ConveyExtensions
    - Check Consul KV permissions
    - Verify configuration key paths
    - Monitor configuration refresh intervals
+

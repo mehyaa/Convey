@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Metrics.AppMetrics
+parent: Observability
+---
 # Convey.Metrics.AppMetrics
 
 Application metrics collection and monitoring integration using App.Metrics framework providing comprehensive performance monitoring, custom metrics, and observability for microservices.
@@ -1028,3 +1033,4 @@ public static class ApplicationBuilderExtensions
    - Verify metric registration and configuration
    - Check metric collection intervals
    - Validate metric output endpoints
+

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Persistence.OpenStack.OCS
+parent: Persistence
+---
 # Convey.Persistence.OpenStack.OCS
 
 OpenStack Object Storage Service (Swift) integration providing scalable cloud object storage with authentication, containers management, and high-performance file operations for distributed applications.
@@ -1090,3 +1095,4 @@ public interface IOpenStackObjectStorage
    - Monitor storage usage regularly
    - Implement cleanup policies for old files
    - Consider lifecycle management policies
+

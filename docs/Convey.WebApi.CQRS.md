@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.WebApi.CQRS
+parent: Foundation
+---
 # Convey.WebApi.CQRS
 
 Web API CQRS integration providing seamless command and query handling through HTTP endpoints with automatic request binding, validation, and response formatting for CQRS-based applications.
@@ -655,7 +660,9 @@ public static class CqrsEndpointConventions
             });
 
         // Get by ID endpoint
+{% raw %}
         endpoints.Get($"/api/{basePath}/{{id}}",
+{% endraw %}
             auth: requireAuth,
             context: async (GetQuery<TEntity, TKey> query, HttpContext ctx) =>
             {
@@ -675,7 +682,9 @@ public static class CqrsEndpointConventions
             });
 
         // Update endpoint
+{% raw %}
         endpoints.Put($"/api/{basePath}/{{id}}",
+{% endraw %}
             auth: requireAuth,
             context: async (UpdateCommand<TEntity> command, HttpContext ctx) =>
             {
@@ -689,7 +698,9 @@ public static class CqrsEndpointConventions
             });
 
         // Delete endpoint
+{% raw %}
         endpoints.Delete($"/api/{basePath}/{{id}}",
+{% endraw %}
             auth: requireAuth,
             roles: requiredRole,
             context: async (DeleteCommand<TEntity> command, HttpContext ctx) =>

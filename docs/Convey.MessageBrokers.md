@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.MessageBrokers
+parent: Message Brokers
+---
 # Convey.MessageBrokers
 
 Message broker abstractions providing unified messaging patterns, event publishing/subscribing, and seamless integration with various message broker implementations for building event-driven architectures.
@@ -840,3 +845,4 @@ public static IConveyBuilder AddEventHandlers(this IConveyBuilder builder, Assem
    - Review error handling logic
    - Implement dead letter message reprocessing
    - Monitor and alert on dead letter queue growth
+

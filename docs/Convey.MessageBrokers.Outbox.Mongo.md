@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.MessageBrokers.Outbox.Mongo
+parent: Message Brokers
+---
 # Convey.MessageBrokers.Outbox.Mongo
 
 MongoDB integration for the Outbox pattern providing NoSQL-based outbox message storage with MongoDB's rich querying capabilities, scalability, and document-based storage.
@@ -1330,3 +1335,4 @@ public static class ConveyExtensions
    - Monitor replica set lag
    - Use appropriate read preferences
    - Consider read concern settings
+

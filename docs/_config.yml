@@ -1,0 +1,14 @@
+title: Convey
+description: A lightweight, modular toolkit for rapidly building production-ready .NET (Core) microservices.
+theme: just-the-docs
+
+url: https://mehyaa.github.io/Convey
+
+aux_links:
+  "Convey on GitHub":
+    - "//github.com/mehyaa/Convey"
+
+heading_anchors: true
+
+# Footer content
+footer_content: "Copyright &copy; 2025 Convey. Distributed by an [MIT license](https://github.com/mehyaa/Convey/blob/master/LICENSE)."

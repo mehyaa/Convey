@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.CQRS.Queries
+parent: CQRS
+---
 # Convey.CQRS.Queries
 
 Query handling abstractions for CQRS pattern providing query dispatching, handling, and support for read-optimized operations in microservices architecture.
@@ -895,3 +900,4 @@ public class QueryIntegrationTests : IClassFixture<WebApplicationFactory<Program
    - Ensure validation decorators are properly registered
    - Check validator implementations
    - Verify query validation rules are correct
+

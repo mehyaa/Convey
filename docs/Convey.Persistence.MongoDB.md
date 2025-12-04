@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Persistence.MongoDB
+parent: Persistence
+---
 # Convey.Persistence.MongoDB
 
 MongoDB integration package providing repository patterns, database initialization, seeding capabilities, and advanced MongoDB features for .NET applications.
@@ -701,3 +706,4 @@ public class MongoTestFixture : IDisposable
    - Add appropriate indexes
    - Use projections to limit returned data
    - Consider using aggregation pipelines for complex queries
+

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.LoadBalancing.Fabio
+parent: Service Discovery & Load Balancing
+---
 # Convey.LoadBalancing.Fabio
 
 Load balancing integration using Fabio reverse proxy providing dynamic service discovery, health checking, and intelligent traffic distribution for microservices architectures.
@@ -772,3 +777,4 @@ public static class ConveyExtensions
    - Verify certificate configuration
    - Check SSL termination settings
    - Ensure proper HTTPS routing
+

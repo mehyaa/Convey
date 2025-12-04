@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.WebApi.Security
+parent: Authentication & Security
+---
 # Convey.WebApi.Security
 
 Web API security extensions providing authentication, authorization, CORS configuration, rate limiting, and security headers for ASP.NET Core applications with integrated security policies and middleware.
@@ -930,3 +935,4 @@ public static class ConveyExtensions
    - Verify policy requirements
    - Check user roles and claims
    - Ensure handlers are registered
+

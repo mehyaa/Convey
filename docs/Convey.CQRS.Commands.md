@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.CQRS.Commands
+parent: CQRS
+---
 # Convey.CQRS.Commands
 
 Provides CQRS (Command Query Responsibility Segregation) command handling abstractions and infrastructure. Implements the command pattern for handling write operations in a decoupled, testable manner.
@@ -647,3 +652,4 @@ public class CommandIntegrationTests : IClassFixture<WebApplicationFactory<Progr
    - Use async/await properly in handlers
    - Consider background processing for long-running commands
    - Implement proper exception handling to avoid retries
+
