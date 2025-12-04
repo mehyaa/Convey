@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.CQRS.Events
+parent: CQRS
+---
 # Convey.CQRS.Events
 
 Event handling abstractions for CQRS pattern providing event dispatching, handling, and integration with message brokers for building event-driven architectures.
@@ -843,3 +848,4 @@ public class EventDispatcherIntegrationTests : IClassFixture<WebApplicationFacto
    - Consider async processing for long-running handlers
    - Implement proper exception handling to avoid blocking
    - Use decorators for metrics and monitoring
+

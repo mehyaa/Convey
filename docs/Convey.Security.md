@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Security
+parent: Authentication & Security
+---
 # Convey.Security
 
 Core security abstractions and utilities providing encryption, hashing, authentication helpers, and security policy enforcement for Convey-based applications with standardized security implementations.
@@ -1117,3 +1122,4 @@ public static class ConveyExtensions
    - Review validation rules configuration
    - Check regex patterns
    - Verify error handling
+

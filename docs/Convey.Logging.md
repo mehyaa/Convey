@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Logging
+parent: Observability
+---
 # Convey.Logging
 
 Structured logging abstractions and integrations providing consistent logging patterns, contextual enrichment, and seamless integration with popular logging frameworks like Serilog and NLog.
@@ -707,3 +712,4 @@ public static IConveyBuilder AddSeqLogging(this IConveyBuilder builder, string u
    - Check file permissions
    - Verify disk space availability
    - Ensure file paths are accessible
+

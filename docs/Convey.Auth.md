@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Auth
+parent: Authentication & Security
+---
 # Convey.Auth
 
 JWT (JSON Web Token) authentication library with support for secret keys and X.509 certificates. Provides comprehensive authentication and authorization capabilities for microservices.
@@ -492,3 +497,4 @@ public class ProfileController : ControllerBase
    - Verify claims are added during token creation
    - Check claim name mapping configuration
    - Ensure proper deserialization
+

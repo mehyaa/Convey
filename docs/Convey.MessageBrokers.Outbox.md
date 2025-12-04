@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.MessageBrokers.Outbox
+parent: Message Brokers
+---
 # Convey.MessageBrokers.Outbox
 
 Outbox pattern implementation for reliable message publishing ensuring transactional consistency between database operations and message broker publishing with at-least-once delivery guarantees.
@@ -1112,3 +1117,4 @@ public static class ConveyExtensions
    - Ensure proper transaction scope management
    - Check for deadlocks and connection issues
    - Verify outbox repository implementation
+

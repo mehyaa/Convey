@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Persistence.Redis
+parent: Persistence
+---
 # Convey.Persistence.Redis
 
 Redis persistence integration providing caching, session storage, distributed locking, and high-performance data operations for Convey-based applications with comprehensive Redis features.
@@ -1384,3 +1389,4 @@ public static class ConveyExtensions
    - Check object serialization compatibility
    - Verify JSON serialization settings
    - Handle circular references
+

@@ -1,10 +1,15 @@
+---
+layout: default
+title: GettingStarted
+parent: Home
+---
 # Getting Started with Convey
 
 This guide shows a practical end‑to‑end setup of a microservice using Convey’s modular packages. You can copy snippets directly or adapt them to existing solutions.
 
 ## Prerequisites
 
-- .NET 8.0 or later
+- .NET 10.0 or later
 - Basic knowledge of C# and ASP.NET Core
 - (Optional) Docker for running dependencies like MongoDB, RabbitMQ
 

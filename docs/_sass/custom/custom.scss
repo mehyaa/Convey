@@ -1,0 +1,35 @@
+/* Custom SCSS overrides */
+
+// Increase sidebar width (default is around 260px)
+$nav-width: 25rem !default;
+$nav-width-md: 22rem !default;
+
+// Increase content width (default is 50rem/800px)
+$content-width: 70rem !default;
+
+// Prevent text wrapping in sidebar and add ellipsis
+.nav-list-link {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 1rem;
+}
+
+// Ensure the content area adjusts to the new sidebar width
+@media (min-width: 50rem) {
+  .side-bar {
+    width: $nav-width;
+  }
+
+  .side-bar+.main {
+    margin-left: $nav-width;
+  }
+
+  .main-content-wrap {
+    margin-left: 0;
+  }
+
+  .main-content {
+    max-width: $content-width;
+  }
+}

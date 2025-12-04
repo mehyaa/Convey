@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey
+parent: Foundation
+---
 # Convey
 
 The core Convey library provides the foundation for building microservices with .NET. It includes dependency injection extensions, configuration utilities, and application bootstrapping features.
@@ -312,3 +317,4 @@ builder.Services.AddConvey()
 4. **Service registration issues**
    - Use `TryRegister()` to avoid duplicate registrations
    - Check service lifetimes and dependencies
+

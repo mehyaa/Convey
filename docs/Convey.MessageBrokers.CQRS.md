@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.MessageBrokers.CQRS
+parent: Message Brokers
+---
 # Convey.MessageBrokers.CQRS
 
 Integration layer between Convey's message brokers and CQRS pattern, providing extension methods for publishing commands and events through message brokers and dispatchers that route CQRS messages to message bus.
@@ -389,3 +394,4 @@ This package requires:
    - Ensure command/event classes are serializable
    - Check message broker serialization settings
    - Verify data contracts are consistent across services
+

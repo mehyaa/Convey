@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - .github/workflows/main.yml
+      - src/**/*
+      - Directory.Build.props
   pull_request:
     branches:
       - master
@@ -11,6 +15,10 @@ on:
       - opened
       - reopened
       - synchronize
+    paths:
+      - .github/workflows/main.yml
+      - src/**/*
+      - Directory.Build.props
   workflow_dispatch:
   repository_dispatch:
 

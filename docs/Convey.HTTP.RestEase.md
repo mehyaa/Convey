@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.HTTP.RestEase
+parent: HTTP & API
+---
 # Convey.HTTP.RestEase
 
 HTTP client integration using RestEase library providing declarative HTTP API clients, automatic serialization, and seamless integration with Convey's service discovery and resilience patterns.
@@ -841,3 +846,4 @@ public static class ConveyExtensions
    - Adjust HTTP client timeout settings
    - Implement appropriate retry policies
    - Check network connectivity and latency
+

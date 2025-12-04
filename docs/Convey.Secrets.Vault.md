@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Secrets.Vault
+parent: Configuration & Secrets
+---
 # Convey.Secrets.Vault
 
 HashiCorp Vault integration for secure secret management, providing encrypted storage, dynamic secrets, and centralized security policies for sensitive configuration data in microservices applications.
@@ -847,7 +852,9 @@ public class VaultDataProtectionService
         var json = JsonSerializer.Serialize(obj);
         var protectedJson = await ProtectAsync(json, purpose);
 
+{% raw %}
         return JsonSerializer.Deserialize<T>($"{{\"_protected\":\"{protectedJson}\"}}");
+{% endraw %}
     }
 
     public async Task<T> UnprotectObjectAsync<T>(T protectedObj, string purpose = null) where T : class

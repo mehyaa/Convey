@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.WebApi.Swagger
+parent: HTTP & API
+---
 # Convey.WebApi.Swagger
 
 Swagger/OpenAPI integration for Web API documentation, providing automatic API documentation generation, interactive testing interface, and comprehensive API specification for Convey-based applications.
@@ -1074,3 +1079,4 @@ public static class ConveyExtensions
    - Check route configuration
    - Verify middleware order
    - Ensure static files are served correctly
+

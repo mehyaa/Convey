@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.MessageBrokers.RabbitMQ
+parent: Message Brokers
+---
 # Convey.MessageBrokers.RabbitMQ
 
 Comprehensive RabbitMQ integration for building event-driven microservices with automatic message routing, retry mechanisms, dead letter handling, and extensive configuration options.
@@ -656,3 +661,4 @@ public class RabbitMqTestFixture : IDisposable
    - Tune QoS settings
    - Use connection pooling
    - Optimize message serialization
+

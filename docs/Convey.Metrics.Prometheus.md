@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Metrics.Prometheus
+parent: Observability
+---
 # Convey.Metrics.Prometheus
 
 Prometheus metrics integration providing comprehensive application monitoring, performance tracking, and observability with custom metrics, built-in collectors, and dashboard support.
@@ -631,7 +636,9 @@ app.UseMiddleware<BusinessMetricsMiddleware>();
         "targets": [
           {
             "expr": "rate(http_requests_total[5m])",
+{% raw %}
             "legendFormat": "{{method}} {{status_code}}"
+{% endraw %}
           }
         ]
       },

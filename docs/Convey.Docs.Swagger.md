@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Docs.Swagger
+parent: HTTP & API
+---
 # Convey.Docs.Swagger
 
 Swagger/OpenAPI documentation generation and UI integration providing comprehensive API documentation with authentication, request/response examples, and interactive testing capabilities.
@@ -1287,3 +1292,4 @@ public static class ApplicationBuilderExtensions
    - Verify custom CSS/JS files are served correctly
    - Check browser console for JavaScript errors
    - Ensure file paths and MIME types are correct
+

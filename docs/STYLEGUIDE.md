@@ -1,3 +1,8 @@
+---
+layout: default
+title: STYLEGUIDE
+parent: Home
+---
 # Documentation Style Guide
 
 Consistent documentation improves discoverability and lowers onboarding friction. Follow these guidelines when updating or adding docs in this repository.
@@ -67,3 +72,4 @@ Use: "Ensure X is configured" rather than "Make sure X" or "Be sure to".
 
 ---
 For questions or improvements open an issue referencing `STYLEGUIDE.md`.
+

@@ -1,3 +1,8 @@
+---
+layout: default
+title: LibraryTemplates
+parent: Home
+---
 # Convey Library Documentation Templates
 
 This document provides quick reference templates for the remaining Convey libraries. Each library follows similar patterns for configuration and usage.
@@ -471,3 +476,4 @@ Each library documentation typically includes:
 8. **Troubleshooting** - Common issues and solutions
 
 For detailed documentation of any specific library, refer to the individual markdown files in this documentation folder.
+

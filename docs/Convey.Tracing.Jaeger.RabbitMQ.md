@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Tracing.Jaeger.RabbitMQ
+parent: Observability
+---
 # Convey.Tracing.Jaeger.RabbitMQ
 
 Advanced distributed tracing integration combining Jaeger tracing with RabbitMQ message broker monitoring, providing end-to-end observability across microservices communication patterns.
@@ -1386,3 +1391,4 @@ public static class ConveyExtensions
    - Review and update sensitive header lists
    - Implement proper payload sanitization
    - Audit trace outputs regularly
+

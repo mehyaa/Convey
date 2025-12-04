@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Auth.Distributed
+parent: Authentication & Security
+---
 # Convey.Auth.Distributed
 
 Distributed access token service that provides token blacklisting functionality using distributed caching. This package extends the basic JWT authentication provided by `Convey.Auth` with distributed token revocation capabilities.
@@ -293,3 +298,4 @@ This package requires:
    - Verify `AddDistributedAccessTokenValidator` is called
    - Check if JWT options are properly configured
    - Ensure token expiration times match cache expiration
+

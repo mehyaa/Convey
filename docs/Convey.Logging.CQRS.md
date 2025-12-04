@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.Logging.CQRS
+parent: Observability
+---
 # Convey.Logging.CQRS
 
 CQRS-specific logging extensions providing structured logging for commands, queries, and events with automatic correlation tracking, performance monitoring, and distributed tracing integration.
@@ -1226,3 +1231,4 @@ public class LogIgnoreAttribute : Attribute { }
    - Ensure correlation ID middleware is properly configured
    - Verify correlation ID propagation across services
    - Check correlation ID generation and storage
+

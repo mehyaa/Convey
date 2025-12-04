@@ -1,3 +1,8 @@
+---
+layout: default
+title: Convey.MessageBrokers.Outbox.EntityFramework
+parent: Message Brokers
+---
 # Convey.MessageBrokers.Outbox.EntityFramework
 
 Entity Framework Core integration for the Outbox pattern providing database-agnostic outbox message storage with full EF Core features including migrations, change tracking, and LINQ support.
@@ -1141,3 +1146,4 @@ public static class ConveyExtensions
    - Use AsNoTracking for read operations
    - Implement proper disposal patterns
    - Avoid loading large datasets into memory
+
