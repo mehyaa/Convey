@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Convey.CQRS.Queries;
 using Convey.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

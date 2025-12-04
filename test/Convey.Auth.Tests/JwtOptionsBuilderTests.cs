@@ -1,4 +1,3 @@
-using System;
 using Convey.Auth.Builders;
 using Shouldly;
 using Xunit;

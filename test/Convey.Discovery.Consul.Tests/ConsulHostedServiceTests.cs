@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -7,8 +6,6 @@ using Convey.Discovery.Consul.Models;
 using Convey.Discovery.Consul.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
-using Shouldly;
 using Xunit;
 
 namespace Convey.Discovery.Consul.Tests
@@ -18,7 +15,6 @@ namespace Convey.Discovery.Consul.Tests
         private readonly Mock<IConsulService> _consulServiceMock;
         private readonly ServiceRegistration _serviceRegistration;
         private readonly ConsulOptions _consulOptions;
-        private readonly Mock<ILogger<ConsulHostedService>> _loggerMock;
         private readonly ConsulHostedService _hostedService;
 
         public ConsulHostedServiceTests()
@@ -26,12 +22,14 @@ namespace Convey.Discovery.Consul.Tests
             _consulServiceMock = new Mock<IConsulService>();
             _serviceRegistration = new ServiceRegistration { Id = "test-service-id" };
             _consulOptions = new ConsulOptions { Enabled = true, Service = "test-service" };
-            _loggerMock = new Mock<ILogger<ConsulHostedService>>();
+
+            var loggerMock = new Mock<ILogger<ConsulHostedService>>();
+
             _hostedService = new ConsulHostedService(
                 _consulServiceMock.Object,
                 _serviceRegistration,
                 _consulOptions,
-                _loggerMock.Object);
+                loggerMock.Object);
         }
 
         [Fact]

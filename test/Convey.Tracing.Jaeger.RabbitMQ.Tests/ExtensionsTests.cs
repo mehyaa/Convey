@@ -1,5 +1,4 @@
 using Convey.MessageBrokers.RabbitMQ;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
 using Xunit;

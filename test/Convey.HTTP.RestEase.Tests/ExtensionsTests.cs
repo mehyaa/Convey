@@ -1,4 +1,3 @@
-using Convey.HTTP.RestEase;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

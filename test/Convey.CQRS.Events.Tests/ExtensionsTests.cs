@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Convey.CQRS.Events;
 using Convey.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

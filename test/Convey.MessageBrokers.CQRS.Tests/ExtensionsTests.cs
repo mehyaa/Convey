@@ -1,6 +1,5 @@
 using Convey.CQRS.Commands;
 using Convey.CQRS.Events;
-using Convey;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;

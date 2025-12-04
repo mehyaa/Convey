@@ -1,6 +1,4 @@
-using Convey.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Shouldly;
 using Xunit;
 

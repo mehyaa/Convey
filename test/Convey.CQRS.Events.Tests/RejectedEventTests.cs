@@ -1,4 +1,3 @@
-using Convey.CQRS.Events;
 using Shouldly;
 using Xunit;
 

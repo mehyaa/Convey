@@ -1,5 +1,3 @@
-using Convey.CQRS.Commands;
-using Convey.CQRS.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
