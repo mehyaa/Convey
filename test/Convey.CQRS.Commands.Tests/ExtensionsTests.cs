@@ -120,7 +120,6 @@ public class ExtensionsTests
 
         // Act
         builder.AddCommandHandlers();
-        var provider = services.BuildServiceProvider();
 
         // Assert - Decorator should not be registered as a handler
         services.ShouldNotContain(s => s.ImplementationType == typeof(DecoratedCommandHandler));
