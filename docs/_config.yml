@@ -15,5 +15,5 @@ heading_anchors: true
 # Footer content
 footer_content: "Copyright &copy; 2025 Convey. Distributed by an [MIT license](https://github.com/mehyaa/Convey/blob/master/LICENSE)."
 
-gems:
+plugins:
   - jekyll-relative-links
