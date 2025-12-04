@@ -30,7 +30,7 @@ Convey provides features for quickly setting up microservices including:
 #### 1. Restore Dependencies
 **ALWAYS run restore before building after a fresh clone or when dependencies change.**
 ```bash
-dotnet restore Convey.sln
+dotnet restore Convey.slnx
 ```
 - **Expected Time**: 10-15 seconds
 - **Expected Result**: All 35 projects restored successfully with no errors
@@ -38,7 +38,7 @@ dotnet restore Convey.sln
 
 #### 2. Build the Solution
 ```bash
-dotnet build Convey.sln -c Release
+dotnet build Convey.slnx -c Release
 ```
 - **Expected Time**: 12-20 seconds (clean build)
 - **Expected Result**: Build succeeded with 0 errors
@@ -47,7 +47,7 @@ dotnet build Convey.sln -c Release
 
 #### 3. Clean Build Artifacts
 ```bash
-dotnet clean Convey.sln -c Release
+dotnet clean Convey.slnx -c Release
 ```
 - **Expected Time**: 2-3 seconds
 - **Use Case**: Run this before a clean build or when experiencing build issues
@@ -55,7 +55,7 @@ dotnet clean Convey.sln -c Release
 #### 4. Format Code
 **ALWAYS run format before committing code changes.**
 ```bash
-dotnet format Convey.sln --no-restore
+dotnet format Convey.slnx --no-restore
 ```
 - **Expected Time**: 5-10 seconds
 - **Expected Result**: May show whitespace formatting errors in existing code - this is NORMAL
@@ -63,14 +63,14 @@ dotnet format Convey.sln --no-restore
 
 #### 5. Verify No Formatting Changes Needed
 ```bash
-dotnet format Convey.sln --verify-no-changes --no-restore
+dotnet format Convey.slnx --verify-no-changes --no-restore
 ```
 - **Use Case**: Check if code needs formatting without making changes
 - **Exit Code**: Returns non-zero if formatting is needed
 
 #### 6. Run Tests
 ```bash
-dotnet test Convey.sln --no-build --no-restore -c Release
+dotnet test Convey.slnx --no-build --no-restore -c Release
 ```
 - **Expected Result**: No test projects exist - command completes immediately with success
 - **Note**: This repository does not have unit tests
@@ -81,30 +81,30 @@ dotnet test Convey.sln --no-build --no-restore -c Release
 
 1. **Start Fresh** (if needed):
    ```bash
-   dotnet clean Convey.sln -c Release
+   dotnet clean Convey.slnx -c Release
    ```
 
 2. **Restore Dependencies** (after fresh clone or dependency changes):
    ```bash
-   dotnet restore Convey.sln
+   dotnet restore Convey.slnx
    ```
 
 3. **Build**:
    ```bash
-   dotnet build Convey.sln -c Release --no-restore
+   dotnet build Convey.slnx -c Release --no-restore
    ```
    - Expected time: 12-20 seconds
    - Generates NuGet packages in each project's bin/Release directory
 
 4. **Format Your Changes**:
    ```bash
-   dotnet format Convey.sln --no-restore
+   dotnet format Convey.slnx --no-restore
    ```
    - Run on files you modified only
 
 5. **Rebuild After Formatting**:
    ```bash
-   dotnet build Convey.sln -c Release --no-restore
+   dotnet build Convey.slnx -c Release --no-restore
    ```
 
 ## Project Structure
@@ -115,7 +115,7 @@ dotnet test Convey.sln --no-build --no-restore -c Release
 ├── .github/workflows/main.yml    # GitHub Actions CI/CD pipeline
 ├── .gitignore                     # Standard .NET gitignore
 ├── .travis.yml                    # Legacy Travis CI config (reference only)
-├── Convey.sln                     # Main solution file (746 lines, 35 projects)
+├── Convey.slnx                     # Main solution file (746 lines, 35 projects)
 ├── Directory.Build.props          # Shared MSBuild properties (target framework, versioning)
 ├── LICENSE                        # MIT License
 ├── README.md                      # Project documentation
@@ -170,7 +170,7 @@ Located in `samples/`:
 
 ### Build Configuration in CI
 ```bash
-dotnet build Convey.sln \
+dotnet build Convey.slnx \
   --configuration Release \
   --verbosity minimal \
   --property:Version="$VERSION" \
@@ -268,18 +268,18 @@ services.AddConvey()
 
 ```bash
 # Fresh start
-dotnet clean Convey.sln -c Release
-dotnet restore Convey.sln
-dotnet build Convey.sln -c Release --no-restore
+dotnet clean Convey.slnx -c Release
+dotnet restore Convey.slnx
+dotnet build Convey.slnx -c Release --no-restore
 
 # Format code (files you changed)
-dotnet format Convey.sln --no-restore
+dotnet format Convey.slnx --no-restore
 
 # Check formatting
-dotnet format Convey.sln --verify-no-changes --no-restore
+dotnet format Convey.slnx --verify-no-changes --no-restore
 
 # Rebuild
-dotnet build Convey.sln -c Release --no-restore
+dotnet build Convey.slnx -c Release --no-restore
 ```
 
 **Trust these instructions** - they are validated against the actual repository. Only search for additional information if you encounter unexpected behavior or errors not documented here.

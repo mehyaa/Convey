@@ -138,4 +138,38 @@
   <Folder Name="/src/Convey.WebApi.Swagger/src/">
     <Project Path="src/Convey.WebApi.Swagger/src/Convey.WebApi.Swagger/Convey.WebApi.Swagger.csproj" />
   </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Convey.Auth.Distributed.Tests/Convey.Auth.Distributed.Tests.csproj" />
+    <Project Path="test/Convey.Auth.Tests/Convey.Auth.Tests.csproj" />
+    <Project Path="test/Convey.CQRS.Commands.Tests/Convey.CQRS.Commands.Tests.csproj" />
+    <Project Path="test/Convey.CQRS.Events.Tests/Convey.CQRS.Events.Tests.csproj" />
+    <Project Path="test/Convey.CQRS.Queries.Tests/Convey.CQRS.Queries.Tests.csproj" />
+    <Project Path="test/Convey.Discovery.Consul.Tests/Convey.Discovery.Consul.Tests.csproj" />
+    <Project Path="test/Convey.Docs.Swagger.Tests/Convey.Docs.Swagger.Tests.csproj" />
+    <Project Path="test/Convey.HTTP.RestEase.Tests/Convey.HTTP.RestEase.Tests.csproj" />
+    <Project Path="test/Convey.HTTP.Tests/Convey.HTTP.Tests.csproj" />
+    <Project Path="test/Convey.LoadBalancing.Fabio.Tests/Convey.LoadBalancing.Fabio.Tests.csproj" />
+    <Project Path="test/Convey.Logging.CQRS.Tests/Convey.Logging.CQRS.Tests.csproj" />
+    <Project Path="test/Convey.Logging.Tests/Convey.Logging.Tests.csproj" />
+    <Project Path="test/Convey.MessageBrokers.CQRS.Tests/Convey.MessageBrokers.CQRS.Tests.csproj" />
+    <Project Path="test/Convey.MessageBrokers.Outbox.EntityFramework.Tests/Convey.MessageBrokers.Outbox.EntityFramework.Tests.csproj" />
+    <Project Path="test/Convey.MessageBrokers.Outbox.Mongo.Tests/Convey.MessageBrokers.Outbox.Mongo.Tests.csproj" />
+    <Project Path="test/Convey.MessageBrokers.Outbox.Tests/Convey.MessageBrokers.Outbox.Tests.csproj" />
+    <Project Path="test/Convey.MessageBrokers.RabbitMQ.Tests/Convey.MessageBrokers.RabbitMQ.Tests.csproj" />
+    <Project Path="test/Convey.MessageBrokers.Tests/Convey.MessageBrokers.Tests.csproj" />
+    <Project Path="test/Convey.Metrics.AppMetrics.Tests/Convey.Metrics.AppMetrics.Tests.csproj" />
+    <Project Path="test/Convey.Metrics.Prometheus.Tests/Convey.Metrics.Prometheus.Tests.csproj" />
+    <Project Path="test/Convey.Persistence.MongoDB.Tests/Convey.Persistence.MongoDB.Tests.csproj" />
+    <Project Path="test/Convey.Persistence.OpenStack.OCS.Tests/Convey.Persistence.OpenStack.OCS.Tests.csproj" />
+    <Project Path="test/Convey.Persistence.Redis.Tests/Convey.Persistence.Redis.Tests.csproj" />
+    <Project Path="test/Convey.Secrets.Vault.Tests/Convey.Secrets.Vault.Tests.csproj" />
+    <Project Path="test/Convey.Security.Tests/Convey.Security.Tests.csproj" />
+    <Project Path="test/Convey.Tests/Convey.Tests.csproj" />
+    <Project Path="test/Convey.Tracing.Jaeger.RabbitMQ.Tests/Convey.Tracing.Jaeger.RabbitMQ.Tests.csproj" />
+    <Project Path="test/Convey.Tracing.Jaeger.Tests/Convey.Tracing.Jaeger.Tests.csproj" />
+    <Project Path="test/Convey.WebApi.CQRS.Tests/Convey.WebApi.CQRS.Tests.csproj" />
+    <Project Path="test/Convey.WebApi.Security.Tests/Convey.WebApi.Security.Tests.csproj" />
+    <Project Path="test/Convey.WebApi.Swagger.Tests/Convey.WebApi.Swagger.Tests.csproj" />
+    <Project Path="test/Convey.WebApi.Tests/Convey.WebApi.Tests.csproj" />
+  </Folder>
 </Solution>
