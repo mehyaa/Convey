@@ -22,16 +22,16 @@ internal sealed class InMemoryAccessTokenService : IAccessTokenService
         _expires = jwtOptions.Expiry ?? TimeSpan.FromMinutes(jwtOptions.ExpiryMinutes);
     }
 
-    public Task<bool> IsCurrentActiveToken()
-        => IsActiveAsync(GetCurrentAsync());
+    public Task<bool> IsTokenActiveAsync()
+        => IsTokenActiveAsync(GetCurrentAsync());
 
-    public Task DeactivateCurrentAsync()
-        => DeactivateAsync(GetCurrentAsync());
-
-    public Task<bool> IsActiveAsync(string token)
+    public Task<bool> IsTokenActiveAsync(string token)
         => Task.FromResult(string.IsNullOrWhiteSpace(_cache.Get<string>(GetKey(token))));
 
-    public Task DeactivateAsync(string token)
+    public Task DeactivateTokenAsync()
+        => DeactivateTokenAsync(GetCurrentAsync());
+
+    public Task DeactivateTokenAsync(string token)
     {
         _cache.Set(GetKey(token), "revoked", new MemoryCacheEntryOptions
         {

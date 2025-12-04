@@ -27,7 +27,7 @@ public class AccessTokenValidatorMiddleware : IMiddleware
             return;
         }
 
-        if (await _accessTokenService.IsCurrentActiveToken())
+        if (await _accessTokenService.IsTokenActiveAsync())
         {
             await next(context);
 
