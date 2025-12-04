@@ -333,3 +333,5 @@ logs/
 # Jekyll docs
 docs/_site/
 docs/.sass-cache/
+
+.jekyll-cache/
