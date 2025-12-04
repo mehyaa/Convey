@@ -3,73 +3,98 @@ name: Build and Push NuGet Packages
 on:
   push:
     branches:
-    - edge
+      - edge
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
   workflow_dispatch:
   repository_dispatch:
 
 jobs:
   build:
-
-    env:
-      BUILD_CONFIG: 'Release'
-      SOLUTION: 'Convey.sln'
-      DOTNET_VERSION: 10
-
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      SOLUTION: "Convey.sln"
+      BUILD_CONFIG: "Release"
+      PACKAGE_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
     steps:
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        dotnet-quality: 'ga'
+      - name: Checkout Source
+        uses: actions/checkout@v6
 
-    - name: Get Year
-      id: date
-      uses: josStorer/get-current-time@v2
-      with:
-        format: YY
+      - name: Get .NET Version from Directory.Build.props
+        id: dotnet_version
+        shell: bash
+        run: |
+          # 1. Grep the line, extracting only the matched segment
+          # 2. Sed capture group to get the digit after 'net'
+          MAJOR_VERSION=$(grep -oP '<TargetFramework>.*</TargetFramework>' Directory.Build.props | sed -E 's/.*net([0-9]+).*/\1/')
 
-    - name: Checkout Source
-      uses: actions/checkout@v2
+          echo "Detected .NET Major Version: $MAJOR_VERSION"
 
-    - name: Build
-      run: |
-        VERSION="${{ steps.date.outputs.formattedTime }}.${{ env.DOTNET_VERSION }}.${{ github.run_number }}"
+          # 3. Write to GitHub Output
+          echo "major=$MAJOR_VERSION" >> $GITHUB_OUTPUT
 
-        dotnet build \
-          $SOLUTION \
-          --configuration $BUILD_CONFIG \
-          --verbosity minimal \
-          --property:Version="$VERSION" \
-          --property:ContinuousIntegrationBuild=true \
-          --property:Deterministic=true \
-          --property:DeterministicSourcePaths=true \
-          --property:SourceLinkCreate=true \
-          --property:DebugType=pdbonly \
-          --property:IncludeSymbols=true \
-          --property:SymbolPackageFormat=snupkg
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ steps.dotnet_version.outputs.major }}
+          dotnet-quality: "ga"
 
-    - name: Run Tests
-      run: |
-        dotnet test \
-          --configuration $BUILD_CONFIG \
-          --no-restore \
-          --no-build \
-          --verbosity minimal
+      - name: Get Year
+        id: year
+        uses: josStorer/get-current-time@v2
+        with:
+          format: YY
 
-    - name: Publish Packages
-      run: |
-        dotnet nuget push \
-          **\*.nupkg \
-          --source 'https://nuget.pkg.github.com/mehyaa/index.json' \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --skip-duplicate
+      - name: Build
+        run: |
+          VERSION="${{ steps.year.outputs.formattedTime }}.${{ steps.dotnet_version.outputs.major }}.${{ github.run_number }}"
 
-    - name: Publish Symbols
-      run: |
-        dotnet nuget push \
-          **\*.snupkg \
-          --source 'https://nuget.pkg.github.com/mehyaa/index.json' \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --skip-duplicate
+          dotnet build \
+            $SOLUTION \
+            --configuration $BUILD_CONFIG \
+            --verbosity minimal \
+            --property:Version="$VERSION" \
+            --property:ContinuousIntegrationBuild=true \
+            --property:Deterministic=true \
+            --property:DeterministicSourcePaths=true \
+            --property:SourceLinkCreate=true \
+            --property:DebugType=pdbonly \
+            --property:IncludeSymbols=true \
+            --property:SymbolPackageFormat=snupkg
+
+      - name: Run Tests
+        run: |
+          dotnet test \
+            --configuration $BUILD_CONFIG \
+            --no-restore \
+            --no-build \
+            --verbosity minimal
+
+      - name: Publish Packages
+        if: github.event_name != 'pull_request'
+        run: |
+          dotnet nuget push \
+            **\*.nupkg \
+            --source $PACKAGE_SOURCE \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+
+      - name: Publish Symbols
+        if: github.event_name != 'pull_request'
+        run: |
+          dotnet nuget push \
+            **\*.snupkg \
+            --source $PACKAGE_SOURCE \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
