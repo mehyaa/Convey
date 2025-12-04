@@ -5,6 +5,17 @@ on:
     branches:
       - master
     paths:
+      - .github/workflows/docs.yml
+      - docs/**/*
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - .github/workflows/docs.yml
       - docs/**/*
   workflow_dispatch:
 
