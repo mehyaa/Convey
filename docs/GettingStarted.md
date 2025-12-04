@@ -9,7 +9,7 @@ This guide shows a practical end‑to‑end setup of a microservice using Convey
 
 ## Prerequisites
 
-- .NET 8.0 or later
+- .NET 10.0 or later
 - Basic knowledge of C# and ASP.NET Core
 - (Optional) Docker for running dependencies like MongoDB, RabbitMQ
 
@@ -643,4 +643,3 @@ public class UserCreatedEventHandler : IEventHandler<UserCreatedEvent>
 
 ---
 This guide provides a solid foundation. For style & conventions see [`STYLEGUIDE.md`](./STYLEGUIDE.md). Consider adding metrics, tracing and structured logging early for production readiness.
-

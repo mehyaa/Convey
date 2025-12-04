@@ -29,5 +29,6 @@
 
   <ItemGroup Label="Vulnerability Fix">
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="10.0.0" />
   </ItemGroup>
 </Project>
