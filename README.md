@@ -116,7 +116,7 @@ Explore the `samples/` directory for full services demonstrating composition pat
 Issues & PRs are welcome. Please follow conventional commit style and keep changes focused.
 
 ## License
-See the `LICENSE` file for details.
+MIT License - see the [LICENSE](LICENSE) file for details.
 
-Created by [devmentors.io](http://devmentors.io)
-Is being maintained by [mehyaa](https://github.com/mehyaa)
+## Support
+Created by [devmentors.io](http://devmentors.io). Maintained by [mehyaa](https://github.com/mehyaa).
