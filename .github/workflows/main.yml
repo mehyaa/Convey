@@ -53,7 +53,7 @@ jobs:
           echo "major=$MAJOR_VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ steps.dotnet_version.outputs.major }}
           dotnet-quality: "ga"
