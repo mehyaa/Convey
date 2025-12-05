@@ -17,7 +17,7 @@
     <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/main.yml" />
   </Folder>
-  <Folder Name="/Solution Files/docs/">
+  <Folder Name="/docs/">
     <File Path="docs/_config.yml" />
     <File Path="docs/authentication-security.md" />
     <File Path="docs/configuration-secrets.md" />
@@ -67,8 +67,8 @@
     <File Path="docs/service-discovery-load-balancing.md" />
     <File Path="docs/STYLEGUIDE.md" />
   </Folder>
-  <Folder Name="/Solution Files/docs/_sass/" />
-  <Folder Name="/Solution Files/docs/_sass/custom/">
+  <Folder Name="/docs/_sass/" />
+  <Folder Name="/docs/_sass/custom/">
     <File Path="docs/_sass/custom/custom.scss" />
     <File Path="docs/_sass/custom/setup.scss" />
   </Folder>
