@@ -4,12 +4,84 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/Solution Files/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Solution Files/.github/">
+    <File Path=".github/copilot-instructions.md" />
+  </Folder>
+  <Folder Name="/Solution Files/.github/workflows/">
+    <File Path=".github/workflows/docs.yml" />
+    <File Path=".github/workflows/main.yml" />
+  </Folder>
+  <Folder Name="/Solution Files/docs/">
+    <File Path="docs/_config.yml" />
+    <File Path="docs/authentication-security.md" />
+    <File Path="docs/configuration-secrets.md" />
+    <File Path="docs/Convey.Auth.Distributed.md" />
+    <File Path="docs/Convey.Auth.md" />
+    <File Path="docs/Convey.CQRS.Commands.md" />
+    <File Path="docs/Convey.CQRS.Events.md" />
+    <File Path="docs/Convey.CQRS.Queries.md" />
+    <File Path="docs/Convey.Discovery.Consul.md" />
+    <File Path="docs/Convey.Docs.Swagger.md" />
+    <File Path="docs/Convey.HTTP.md" />
+    <File Path="docs/Convey.HTTP.RestEase.md" />
+    <File Path="docs/Convey.LoadBalancing.Fabio.md" />
+    <File Path="docs/Convey.Logging.CQRS.md" />
+    <File Path="docs/Convey.Logging.md" />
+    <File Path="docs/Convey.md" />
+    <File Path="docs/Convey.MessageBrokers.CQRS.md" />
+    <File Path="docs/Convey.MessageBrokers.md" />
+    <File Path="docs/Convey.MessageBrokers.Outbox.EntityFramework.md" />
+    <File Path="docs/Convey.MessageBrokers.Outbox.md" />
+    <File Path="docs/Convey.MessageBrokers.Outbox.Mongo.md" />
+    <File Path="docs/Convey.MessageBrokers.RabbitMQ.md" />
+    <File Path="docs/Convey.Metrics.AppMetrics.md" />
+    <File Path="docs/Convey.Metrics.Prometheus.md" />
+    <File Path="docs/Convey.Persistence.MongoDB.md" />
+    <File Path="docs/Convey.Persistence.OpenStack.OCS.md" />
+    <File Path="docs/Convey.Persistence.Redis.md" />
+    <File Path="docs/Convey.Secrets.Vault.md" />
+    <File Path="docs/Convey.Security.md" />
+    <File Path="docs/Convey.Tracing.Jaeger.md" />
+    <File Path="docs/Convey.Tracing.Jaeger.RabbitMQ.md" />
+    <File Path="docs/Convey.WebApi.CQRS.md" />
+    <File Path="docs/Convey.WebApi.md" />
+    <File Path="docs/Convey.WebApi.Security.md" />
+    <File Path="docs/Convey.WebApi.Swagger.md" />
+    <File Path="docs/cqrs.md" />
+    <File Path="docs/foundation.md" />
+    <File Path="docs/Gemfile" />
+    <File Path="docs/Gemfile.lock" />
+    <File Path="docs/GettingStarted.md" />
+    <File Path="docs/http-api.md" />
+    <File Path="docs/index.md" />
+    <File Path="docs/LibraryTemplates.md" />
+    <File Path="docs/message-brokers.md" />
+    <File Path="docs/observability.md" />
+    <File Path="docs/persistence.md" />
+    <File Path="docs/service-discovery-load-balancing.md" />
+    <File Path="docs/STYLEGUIDE.md" />
+  </Folder>
+  <Folder Name="/Solution Files/docs/_sass/" />
+  <Folder Name="/Solution Files/docs/_sass/custom/">
+    <File Path="docs/_sass/custom/custom.scss" />
+    <File Path="docs/_sass/custom/setup.scss" />
+  </Folder>
   <Folder Name="/samples/">
+    <File Path="samples/Conveyor.rest" />
+    <File Path="samples/Directory.Build.props" />
     <Project Path="samples/Conveyor.Services.Deliveries/Conveyor.Services.Deliveries.csproj" />
     <Project Path="samples/Conveyor.Services.Orders/Conveyor.Services.Orders.csproj" />
     <Project Path="samples/Conveyor.Services.Pricing/Conveyor.Services.Pricing.csproj" />
   </Folder>
-  <Folder Name="/src/" />
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+  </Folder>
   <Folder Name="/src/Convey/" />
   <Folder Name="/src/Convey/src/">
     <Project Path="src/Convey/src/Convey/Convey.csproj" />
@@ -139,6 +211,7 @@
     <Project Path="src/Convey.WebApi.Swagger/src/Convey.WebApi.Swagger/Convey.WebApi.Swagger.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <File Path="test/Directory.Build.props" />
     <Project Path="test/Convey.Auth.Distributed.Tests/Convey.Auth.Distributed.Tests.csproj" />
     <Project Path="test/Convey.Auth.Tests/Convey.Auth.Tests.csproj" />
     <Project Path="test/Convey.CQRS.Commands.Tests/Convey.CQRS.Commands.Tests.csproj" />
