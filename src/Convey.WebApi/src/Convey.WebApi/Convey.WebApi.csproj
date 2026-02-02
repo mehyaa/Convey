@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Vulnerability Fix">
-    <PackageReference Include="System.Text.Json" Version="10.0.0" />
+    <PackageReference Include="System.Text.Json" Version="10.0.2" />
   </ItemGroup>
 
 </Project>
